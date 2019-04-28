@@ -24,3 +24,4 @@ the /send trigger a special sending in case of problems ( a password system will
   <p>Hosted by USS Versailles</p>
 <p>Thanks to https://github.com/ananagame for the Database class</p>
 <p>http://sfi.org</p>
+<p></p>
