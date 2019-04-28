@@ -23,3 +23,4 @@ the /send trigger a special sending in case of problems ( a password system will
   <p>Developped and Maintain by LT Colin THOMAS from the USS Versailles, R9</p>
   <p>Hosted by USS Versailles</p>
 <p>Thanks to https://github.com/ananagame for the Database class</p>
+<p>https://sfi.org</p>
