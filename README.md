@@ -15,6 +15,18 @@ the /send trigger a special sending in case of problems ( a password system will
 
 <br><br>
 <h3>Build it yourself</h3>
+<p>Add a config.json file in the src/main/resource file with this template : 
+{
+"ACCESS_TOKEN":"yourtokenhere",
+"ADMIN_ID":"admin messenger id",
+"SECRET":"app secret id",
+"TOKEN":"Webhook verify token",
+"DB_HOST":"your db host",
+"DB_NAME":"your db name",
+"DB_USER":"your db user",
+"DB_PASSWORD":"your db password"
+}</p>
+The SQL File for the database structure is in src/main/resource/db.sql
 <p>Just setup your key with https://developers.facebook.com and give your keys. after download the source and maven :
   <strong>mvn clean install</strong> and use the file "ARS*****-with-dependencies.jar" put this jar on a server ( like a little VPS ) and run it ! ( build also your client )</p>
   <br><br>
