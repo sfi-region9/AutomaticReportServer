@@ -7,10 +7,9 @@ import com.github.messenger4j.send.MessagePayload;
 import com.github.messenger4j.send.MessagingType;
 import com.github.messenger4j.send.message.TextMessage;
 import com.google.gson.Gson;
-import fr.colin.arsreloaded.commands.HelpCommand;
-import fr.colin.arsreloaded.commands.PingCommand;
-import fr.colin.arsreloaded.commands.SubscribeCommand;
-import fr.colin.arsreloaded.commands.WaitingCommand;
+import fr.colin.arsreloaded.commands.*;
+import fr.colin.arsreloaded.configuration.Config;
+import fr.colin.arsreloaded.configuration.ConfigWrapper;
 import fr.colin.arsreloaded.objects.Users;
 import fr.colin.arsreloaded.utils.Database;
 import fr.colin.arsreloaded.utils.DatabaseWrapper;
@@ -27,10 +26,9 @@ public class ARSReloaded {
     private static Database db;
     private static DatabaseWrapper wrapper;
 
-    public final static String ACCES_TOKEN = "HereGoTheToken";
-    public final static String ADMIN_ID = "HereTheAdminID";
-    public final static String TOKEN = "VerifWebToken";
-    public final static String SECRET = "SecretApp";
+    public static String ADMIN_ID = "";
+    private static String TOKEN = "";
+
 
     public static Database getDb() {
         return db;
@@ -41,8 +39,13 @@ public class ARSReloaded {
     }
 
     public static void main(String... args) {
+        Config cf = new ConfigWrapper().getConfig();
 
-        db = new Database("your_host", "dataname", "user", "password");
+        String ACCES_TOKEN = cf.getACCESS_TOKEN();
+        ADMIN_ID = cf.getADMIN_ID();
+        String SECRET = cf.getSECRET();
+        TOKEN = cf.getTOKEN();
+        db = new Database(cf.getDB_HOST(), cf.getDB_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
 
 
         // new HelpCommand();
@@ -52,6 +55,7 @@ public class ARSReloaded {
 
         new WaitingCommand();
         new SubscribeCommand();
+        new AboutCommand();
         for (Command c : Command.commands.values()) {
             System.out.println("Registred Command : " + c.getName());
         }
@@ -65,13 +69,10 @@ public class ARSReloaded {
 
         Thread verifier = new Thread(new AutoSender());
         verifier.start();
+        sendMessage(ADMIN_ID, "Test");
     }
 
     static int count;
-
-    static void increaseCound() {
-        count++;
-    }
 
     public static void setupRoutes() {
         get("/", (request, response) -> {
@@ -172,25 +173,5 @@ public class ARSReloaded {
         sendMessage(recipientID, message);
     }
 
-    public static boolean isTimeToSent() {
-
-        Calendar cal = Calendar.getInstance();
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-        long last = getWrapper().getLast();
-        int month = cal.get(Calendar.MONTH);
-
-        int detectDay = 0;
-
-        if (month != 2) {
-            detectDay = 28;
-        } else {
-            detectDay = 27;
-        }
-
-        if (detectDay == day && (last + 1000 * 60 * 60 * 24 * 10) < System.currentTimeMillis()) {
-            return true;
-        }
-        return false;
-    }
 
 }
