@@ -10,6 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Class to wrap the database into easy-to-use methods
+ */
+
 public class DatabaseWrapper {
 
     Database db = ARSReloaded.getDb();
@@ -18,14 +22,10 @@ public class DatabaseWrapper {
 
     }
 
-    public Vessel getVesselWithID(String vesselID) throws VesselNotFoundException, SQLException {
-        ResultSet rs = db.getResult("SELECT * FROM `vessels` WHERE vesselid = '" + vesselID + "'");
-        if (!rs.next()) {
-            throw new VesselNotFoundException();
-        }
-        return new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"));
-    }
-
+    /**
+     * Method to get all pending vessels in order to accept/deny them
+     * @return An ArrayList with all the pending vessel ( name,co and id )
+     */
     public ArrayList<String> getPendingWaiting() throws SQLException {
         ArrayList<String> a = new ArrayList<>();
         ResultSet rs = db.getResult("SELECT * FROM `waiting`");
@@ -39,8 +39,12 @@ public class DatabaseWrapper {
         return a;
     }
 
-
-    public boolean coExist(String senderID) throws SQLException {
+    /**
+     * Method to check if a co exist (when a co apply to register his chapter)
+     * @param senderID The ID of the CO
+     * @return if the co exist or not in the database
+    **/
+    private boolean coExist(String senderID) throws SQLException {
         ResultSet rs = db.getResult("SELECT * FROM `vessels` WHERE coid = '" + senderID + "'");
         if (rs.next())
             return true;
@@ -52,6 +56,13 @@ public class DatabaseWrapper {
         return false;
     }
 
+    /**
+     * Method to register a new vessel in the waiting table
+     * @param senderID The ID of the CO
+     * @param vessel The name of the Vessel
+     * @param scc The SCC of the CO
+     * @return if the register is successful
+     */
     public boolean addWaiting(String senderID, String vessel, String scc) throws SQLException {
         if (coExist(senderID)) {
             return false;
@@ -60,6 +71,11 @@ public class DatabaseWrapper {
         return true;
     }
 
+    /**
+     * Get the CO ID of a pending vessel registry
+     * @param vesselID The ID of the CO Vessel
+     * @return The CO ID
+     */
     public String getPendingCoId(String vesselID) throws SQLException, VesselNotFoundException {
         ResultSet rs = db.getResult("SELECT * FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         if (!rs.next())
@@ -67,6 +83,11 @@ public class DatabaseWrapper {
         return rs.getString("coid");
     }
 
+    /**
+     * Method to turn a pending vessel in a full vessel
+     * @param vesselID The ID of the Vessel
+     * @return if the switch is successful
+     */
     public boolean switchPending(String vesselID) throws SQLException {
         ResultSet rs = db.getResult("SELECT * FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         if (!rs.next()) {
@@ -81,7 +102,11 @@ public class DatabaseWrapper {
         return true;
     }
 
-
+    /**
+     * Method to deny a pending vessel and delete it from database
+     * @param vesselID The ID of the Vessel
+     * @return if the deleting is successful
+     */
     public boolean deletePending(String vesselID) throws SQLException {
         ResultSet rs = db.getResult("SELECT * FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         if (!rs.next()) {
@@ -91,13 +116,23 @@ public class DatabaseWrapper {
         return true;
     }
 
-    public String vesselNameToID(String vesselName) {
+    /**
+     * A method to convert a vesselname in a one-word ID
+     * @param vesselName The Name to convert
+     * @return The ID from the name
+     */
+    private String vesselNameToID(String vesselName) {
         vesselName = vesselName.replace("_", "");
         vesselName = vesselName.toLowerCase();
         return vesselName;
     }
 
-    public boolean exist(Users user) {
+    /**
+     * Check if a user exist in the database by his SCC
+     * @param user The User object
+     * @return if the user exist or not
+     */
+    private boolean exist(Users user) {
         ResultSet rs = db.getResult("SELECT * FROM `users` WHERE scc='" + user.getScc() + "'");
         try {
             return rs.next();
@@ -107,12 +142,20 @@ public class DatabaseWrapper {
         return false;
     }
 
+    /**
+     * Register a new user in the database
+     * @param user The User object to register
+     */
     public void register(Users user) {
         if (exist(user))
             return;
         db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report) VALUES('%s','%s','%s','Nothing to report')", user.getName(), user.getScc(), user.getVesselid()));
     }
 
+    /**
+     * Save the report for the given user ( from the HTTP Call )
+     * @param users The User object with the report
+     */
     public void saveReport(Users users) {
         if (!exist(users)) {
             register(users);
@@ -120,6 +163,11 @@ public class DatabaseWrapper {
         db.update(String.format("UPDATE `users` SET report='" + users.getReport().replace("\n", "\\n") + "' WHERE scc='" + users.getScc() + "'"));
     }
 
+    /**
+     * Get report of the given user ( for the syncronize HTTP Call )
+     * @param users The User object
+     * @return The current report
+     */
     public String getReport(Users users) {
         if (!exist(users)) {
             register(users);
@@ -128,6 +176,10 @@ public class DatabaseWrapper {
         return ((String) db.read("SELECT * FROM `users` WHERE scc='" + users.getScc() + "'", "report")).replace("\n", "\\n");
     }
 
+    /**
+     * Method to send all reports of all user to their respective CO
+     * @return Report
+     */
     public String sendReports() throws SQLException {
         System.out.println("Reports");
         ResultSet rs = db.getResult("SELECT * FROM `vessels`");
@@ -160,10 +212,18 @@ public class DatabaseWrapper {
         return "Report";
     }
 
+    /**
+     * Method to get the timestamp of the last sending
+     * @return The timestamp.
+     */
     public Long getLast() {
         return (Long) db.read("SELECT * FROM `properties` WHERE id=0", "last");
     }
 
+
+    /**
+     * Method to set the last timestamp of the sending
+     */
     public void setLast() {
         db.update("UPDATE `properties` SET last=" + System.currentTimeMillis() + " WHERE id=0");
     }

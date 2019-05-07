@@ -13,23 +13,12 @@ public class Users {
     private String report = "";
 
 
-    /**
-     * @param name
-     * @param scc
-     * @param vesselid
-     */
     public Users(String name, String scc, String vesselid) {
         this.name = name;
         this.scc = scc;
         this.vesselid = vesselid;
     }
 
-    /**
-     * @param name
-     * @param scc
-     * @param vesselid
-     * @param report
-     */
     public Users(String name, String scc, String vesselid, String report) {
         this.name = name;
         this.scc = scc;

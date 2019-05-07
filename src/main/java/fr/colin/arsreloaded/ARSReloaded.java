@@ -19,6 +19,9 @@ import java.util.*;
 
 import static spark.Spark.*;
 
+/**
+ * Main class of the Messenger Bot and Spark HTTP API
+ */
 public class ARSReloaded {
 
 
@@ -39,17 +42,17 @@ public class ARSReloaded {
     }
 
     public static void main(String... args) {
-        Config cf = new ConfigWrapper().getConfig();
 
+        //Load configuration
+        Config cf = new ConfigWrapper().getConfig();
         String ACCES_TOKEN = cf.getACCESS_TOKEN();
         ADMIN_ID = cf.getADMIN_ID();
         String SECRET = cf.getSECRET();
         TOKEN = cf.getTOKEN();
         db = new Database(cf.getDB_HOST(), cf.getDB_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
-
-
-        // new HelpCommand();
         wrapper = new DatabaseWrapper();
+
+        //Register commands
         new HelpCommand();
         new PingCommand();
 
@@ -59,6 +62,8 @@ public class ARSReloaded {
         for (Command c : Command.commands.values()) {
             System.out.println("Registred Command : " + c.getName());
         }
+
+        //Build messenger
         try {
             messenger = Messenger.create(ACCES_TOKEN, SECRET, TOKEN);
         } catch (Exception e) {
@@ -69,12 +74,12 @@ public class ARSReloaded {
 
         Thread verifier = new Thread(new AutoSender());
         verifier.start();
-        sendMessage(ADMIN_ID, "Test");
     }
 
-    static int count;
-
-    public static void setupRoutes() {
+    /**
+     * Setup all the route in a separated method
+     */
+    private static void setupRoutes() {
         get("/", (request, response) -> {
             String sentToken = request.queryParams("hub.verify_token");
             if (sentToken.equalsIgnoreCase(TOKEN))
@@ -116,7 +121,13 @@ public class ARSReloaded {
         get("/hello", (request, response) -> "Hello World");
     }
 
-    public static void parseCommand(String text, String recipientID) {
+
+    /**
+     * Simple method to parse commands sent by messenger to the server
+     * @param text Raw text receive from messenger
+     * @param recipientID Messenger ID of the sender of the command
+     */
+    private static void parseCommand(String text, String recipientID) {
         if (!text.startsWith("!")) {
             sendHelp(recipientID);
             return;
@@ -135,6 +146,10 @@ public class ARSReloaded {
         c.onCommand(recipientID, text, args);
     }
 
+    /**
+     * Method to send the help ( all commands and their usage ) to a user.
+     * @param recipientID ID of the recipient.
+     */
     public static void sendHelp(String recipientID) {
         ArrayList<String> message = new ArrayList<>();
 
@@ -154,6 +169,11 @@ public class ARSReloaded {
         sendMultiMessage(recipientID, "ARS Help", message);
     }
 
+    /**
+     *Method to send a messenger message to a person
+     * @param recipientID ID of the recipient of the message
+     * @param message The message
+     */
     public static void sendMessage(String recipientID, String message) {
         MessagePayload payload = MessagePayload.create(recipientID, MessagingType.RESPONSE, TextMessage.create(message));
         try {
@@ -163,6 +183,12 @@ public class ARSReloaded {
         }
     }
 
+    /**
+     * Method to send an organized message in multi line
+     * @param recipientID ID of the recipient of the message
+     * @param header Header in the upper and lower bars
+     * @param messages The message
+     */
     public static void sendMultiMessage(String recipientID, String header, List<String> messages) {
         ArrayList<String> finalM = new ArrayList<>();
         finalM.add(String.format("-------------------------------- %s --------------------------------", header));

@@ -2,6 +2,10 @@ package fr.colin.arsreloaded;
 
 import java.util.HashMap;
 
+/**
+ * Abstract class to handle command request from the messenger bot
+ */
+
 public abstract class Command {
 
     private String name;

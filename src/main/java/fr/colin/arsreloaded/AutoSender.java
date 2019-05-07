@@ -7,6 +7,10 @@ import java.util.Calendar;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * Simple runnable class, this class send reports every 30th of each month - except february.
+ */
+
 public class AutoSender implements Runnable {
 
     public DatabaseWrapper db = new DatabaseWrapper();
@@ -27,7 +31,7 @@ public class AutoSender implements Runnable {
         if (month != 2) {
             detectDay = 28;
         } else {
-            detectDay = 27;
+            detectDay = 30;
         }
 
         if (detectDay == day && (last + 1000 * 60 * 60 * 24 * 10) < System.currentTimeMillis()) {
