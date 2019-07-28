@@ -193,7 +193,6 @@ public class ARSReloaded {
         ArrayList<String> finalM = new ArrayList<>();
         finalM.add(String.format("-------------------------------- %s --------------------------------", header));
         finalM.addAll(messages);
-        finalM.add("");
         finalM.add(String.format("-------------------------------- %s --------------------------------", header));
         String message = StringUtils.join(finalM, "\n");
         sendMessage(recipientID, message);

@@ -20,7 +20,7 @@ public class AboutCommand extends Command {
         all.add("Automatize all your report in your chapter !");
         all.add("Send a message to Colin THOMAS, a mail to contact@nwa2coco.fr for any informations !");
         all.add("Developped with ❤️ by Colin THOMAS");
-        all.add("Maintained by USS Versailles, R9");
+        all.add("Maintained and Hosted by USS Versailles, R9");
         all.add(" ");
         sendMultiMessage(senderID, "Automatic Report Server", all);
     }
