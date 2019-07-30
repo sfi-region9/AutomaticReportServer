@@ -12,6 +12,7 @@ import fr.colin.arsreloaded.configuration.Config;
 import fr.colin.arsreloaded.configuration.ConfigWrapper;
 import fr.colin.arsreloaded.objects.Users;
 import fr.colin.arsreloaded.utils.Database;
+import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
 import fr.colin.arsreloaded.utils.DatabaseWrapper;
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,6 +28,8 @@ public class ARSReloaded {
 
     public static Messenger messenger = null;
     private static Database db;
+    private static Database userDatabase;
+    private static DatabaseUserWrapper wrapperD;
     private static DatabaseWrapper wrapper;
 
     public static String ADMIN_ID = "";
@@ -50,8 +53,9 @@ public class ARSReloaded {
         String SECRET = cf.getSECRET();
         TOKEN = cf.getTOKEN();
         db = new Database(cf.getDB_HOST(), cf.getDB_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
+        userDatabase = new Database(cf.getDB_HOST(), "uvrim_web", cf.getDB_USER(), cf.getDB_PASSWORD());
         wrapper = new DatabaseWrapper();
-
+        wrapperD = new DatabaseUserWrapper();
         //Register commands
         new HelpCommand();
         new PingCommand();
@@ -59,6 +63,7 @@ public class ARSReloaded {
         new WaitingCommand();
         new SubscribeCommand();
         new AboutCommand();
+        new LinkCommand();
         for (Command c : Command.commands.values()) {
             System.out.println("Registred Command : " + c.getName());
         }
@@ -115,6 +120,7 @@ public class ARSReloaded {
             Users users = new Gson().fromJson(json, Users.class);
             return getWrapper().getReport(users);
         });
+
 
         get("/send", (request, response) -> getWrapper().sendReports());
 
@@ -198,5 +204,11 @@ public class ARSReloaded {
         sendMessage(recipientID, message);
     }
 
+    public static Database getUserDatabase() {
+        return userDatabase;
+    }
 
+    public static DatabaseUserWrapper getWrapperD() {
+        return wrapperD;
+    }
 }

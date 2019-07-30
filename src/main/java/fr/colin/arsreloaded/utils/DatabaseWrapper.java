@@ -22,6 +22,11 @@ public class DatabaseWrapper {
 
     }
 
+    public static void checkDatabase(Database database) throws SQLException {
+        if(!database.getConnection().isValid(31536000)){
+        }
+    }
+
     /**
      * Method to get all pending vessels in order to accept/deny them
      * @return An ArrayList with all the pending vessel ( name,co and id )
@@ -137,11 +142,9 @@ public class DatabaseWrapper {
         try {
             return rs.next();
         } catch (SQLException e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
-
     /**
      * Register a new user in the database
      * @param user The User object to register

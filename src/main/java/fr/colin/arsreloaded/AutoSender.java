@@ -48,6 +48,7 @@ public class AutoSender implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            ARSReloaded.sendMessage("2641276175888996", "I'm still here");
             System.out.println("Launching Automatic Launching Verification");
             if (isTimeToSent()) {
                 System.out.println("Time is now :D !");
