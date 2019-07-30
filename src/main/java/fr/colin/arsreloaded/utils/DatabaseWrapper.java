@@ -4,10 +4,12 @@ import fr.colin.arsreloaded.ARSReloaded;
 import fr.colin.arsreloaded.objects.Users;
 import fr.colin.arsreloaded.objects.Vessel;
 import fr.colin.arsreloaded.objects.VesselNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -23,12 +25,13 @@ public class DatabaseWrapper {
     }
 
     public static void checkDatabase(Database database) throws SQLException {
-        if(!database.getConnection().isValid(31536000)){
+        if (!database.getConnection().isValid(31536000)) {
         }
     }
 
     /**
      * Method to get all pending vessels in order to accept/deny them
+     *
      * @return An ArrayList with all the pending vessel ( name,co and id )
      */
     public ArrayList<String> getPendingWaiting() throws SQLException {
@@ -46,9 +49,10 @@ public class DatabaseWrapper {
 
     /**
      * Method to check if a co exist (when a co apply to register his chapter)
+     *
      * @param senderID The ID of the CO
      * @return if the co exist or not in the database
-    **/
+     **/
     private boolean coExist(String senderID) throws SQLException {
         ResultSet rs = db.getResult("SELECT * FROM `vessels` WHERE coid = '" + senderID + "'");
         if (rs.next())
@@ -63,9 +67,10 @@ public class DatabaseWrapper {
 
     /**
      * Method to register a new vessel in the waiting table
+     *
      * @param senderID The ID of the CO
-     * @param vessel The name of the Vessel
-     * @param scc The SCC of the CO
+     * @param vessel   The name of the Vessel
+     * @param scc      The SCC of the CO
      * @return if the register is successful
      */
     public boolean addWaiting(String senderID, String vessel, String scc) throws SQLException {
@@ -78,6 +83,7 @@ public class DatabaseWrapper {
 
     /**
      * Get the CO ID of a pending vessel registry
+     *
      * @param vesselID The ID of the CO Vessel
      * @return The CO ID
      */
@@ -90,6 +96,7 @@ public class DatabaseWrapper {
 
     /**
      * Method to turn a pending vessel in a full vessel
+     *
      * @param vesselID The ID of the Vessel
      * @return if the switch is successful
      */
@@ -103,12 +110,13 @@ public class DatabaseWrapper {
         String coscc = rs.getString("coscc");
         String vesselName = rs.getString("vesselname");
         db.update("DELETE FROM `waiting` WHERE vesselid = '" + vesselID + "'");
-        db.update(String.format("INSERT INTO `vessels`(name,vesselid,coid) VALUES('%s','%s','%s')", vesselName, vesselid, coID));
+        db.update(String.format("INSERT INTO `vessels`(name,vesselid,coid,template,default_text) VALUES('%s','%s','%s','%s','%s')", vesselName, vesselid, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "Nothing to report"));
         return true;
     }
 
     /**
      * Method to deny a pending vessel and delete it from database
+     *
      * @param vesselID The ID of the Vessel
      * @return if the deleting is successful
      */
@@ -121,8 +129,32 @@ public class DatabaseWrapper {
         return true;
     }
 
+    public boolean isCo(String coID) {
+        ResultSet rs = db.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
+        try {
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Vessel vCo(String coID) throws SQLException {
+        ResultSet rs = db.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
+        rs.next();
+        return new Vessel(rs.getString("name").replace("_", " "), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
+    }
+
+    public void changeVesselTemplate(Vessel vessel, String template) {
+        db.update("UPDATE vessels SET template='" + template + "' WHERE vesselid='" + vessel.getVesselid() + "'");
+    }
+    public void changeVesselDefaultReport(Vessel vessel, String defaul) {
+        db.update("UPDATE vessels SET default_text='" + defaul + "' WHERE vesselid='" + vessel.getVesselid() + "'");
+    }
+
     /**
      * A method to convert a vesselname in a one-word ID
+     *
      * @param vesselName The Name to convert
      * @return The ID from the name
      */
@@ -134,6 +166,7 @@ public class DatabaseWrapper {
 
     /**
      * Check if a user exist in the database by his SCC
+     *
      * @param user The User object
      * @return if the user exist or not
      */
@@ -145,8 +178,10 @@ public class DatabaseWrapper {
             return false;
         }
     }
+
     /**
      * Register a new user in the database
+     *
      * @param user The User object to register
      */
     public void register(Users user) {
@@ -157,6 +192,7 @@ public class DatabaseWrapper {
 
     /**
      * Save the report for the given user ( from the HTTP Call )
+     *
      * @param users The User object with the report
      */
     public void saveReport(Users users) {
@@ -168,6 +204,7 @@ public class DatabaseWrapper {
 
     /**
      * Get report of the given user ( for the syncronize HTTP Call )
+     *
      * @param users The User object
      * @return The current report
      */
@@ -181,6 +218,7 @@ public class DatabaseWrapper {
 
     /**
      * Method to send all reports of all user to their respective CO
+     *
      * @return Report
      */
     public String sendReports() throws SQLException {
@@ -190,7 +228,7 @@ public class DatabaseWrapper {
         HashMap<Vessel, ArrayList<Users>> users = new HashMap<>();
 
         while (rs.next()) {
-            vessels.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid")));
+            vessels.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text")));
         }
 
         for (Vessel v : vessels) {
@@ -204,12 +242,19 @@ public class DatabaseWrapper {
         System.out.println(users.size());
 
         for (Vessel v : users.keySet()) {
-            System.out.println("Debug");
+            ArrayList<String> message = new ArrayList<>();
+            message.add("Starting " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
+            message.add("--------------------------------------------------------------------");
+            message.add(" ");
             for (Users u : users.get(v)) {
-                System.out.println(u.getVesselid() + " " + u.getScc() + " " + v.getCoid() + " " + (ARSReloaded.messenger==null));
-                ARSReloaded.sendMessage(v.getCoid(), u.constructReport());
-                db.update("UPDATE `users` SET report='Nothing to report' WHERE scc='" + u.getScc() + "'");
+                System.out.println(u.getVesselid() + " " + u.getScc() + " " + v.getCoid() + " " + (ARSReloaded.messenger == null));
+                message.add(u.constructReport(v));
+                message.add("--------------------------------------------------------------------");
+                db.update("UPDATE `users` SET report='" + v.getDefaul() + "' WHERE scc='" + u.getScc() + "'");
             }
+            message.add(" ");
+            message.add("End of " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
+            ARSReloaded.sendMessage(v.getCoid(), StringUtils.join(message, "\n"));
         }
 
         return "Report";
@@ -217,6 +262,7 @@ public class DatabaseWrapper {
 
     /**
      * Method to get the timestamp of the last sending
+     *
      * @return The timestamp.
      */
     public Long getLast() {

@@ -16,6 +16,7 @@ import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
 import fr.colin.arsreloaded.utils.DatabaseWrapper;
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static spark.Spark.*;
@@ -35,6 +36,7 @@ public class ARSReloaded {
     public static String ADMIN_ID = "";
     private static String TOKEN = "";
 
+    public static SimpleDateFormat DATE = new SimpleDateFormat("MMMM YYYY");
 
     public static Database getDb() {
         return db;
@@ -63,6 +65,8 @@ public class ARSReloaded {
         new WaitingCommand();
         new SubscribeCommand();
         new AboutCommand();
+        new DefaultCommand();
+        new TemplateCommand();
         new LinkCommand();
         for (Command c : Command.commands.values()) {
             System.out.println("Registred Command : " + c.getName());
@@ -115,6 +119,11 @@ public class ARSReloaded {
             return "Save";
         });
 
+        get("/send", (request, response) -> {
+            new DatabaseWrapper().sendReports();
+            return "congratulations";
+        });
+
         post("/syncronize", (request, response) -> {
             String json = request.body();
             Users users = new Gson().fromJson(json, Users.class);
@@ -130,7 +139,8 @@ public class ARSReloaded {
 
     /**
      * Simple method to parse commands sent by messenger to the server
-     * @param text Raw text receive from messenger
+     *
+     * @param text        Raw text receive from messenger
      * @param recipientID Messenger ID of the sender of the command
      */
     private static void parseCommand(String text, String recipientID) {
@@ -154,6 +164,7 @@ public class ARSReloaded {
 
     /**
      * Method to send the help ( all commands and their usage ) to a user.
+     *
      * @param recipientID ID of the recipient.
      */
     public static void sendHelp(String recipientID) {
@@ -176,9 +187,10 @@ public class ARSReloaded {
     }
 
     /**
-     *Method to send a messenger message to a person
+     * Method to send a messenger message to a person
+     *
      * @param recipientID ID of the recipient of the message
-     * @param message The message
+     * @param message     The message
      */
     public static void sendMessage(String recipientID, String message) {
         MessagePayload payload = MessagePayload.create(recipientID, MessagingType.RESPONSE, TextMessage.create(message));
@@ -191,9 +203,10 @@ public class ARSReloaded {
 
     /**
      * Method to send an organized message in multi line
+     *
      * @param recipientID ID of the recipient of the message
-     * @param header Header in the upper and lower bars
-     * @param messages The message
+     * @param header      Header in the upper and lower bars
+     * @param messages    The message
      */
     public static void sendMultiMessage(String recipientID, String header, List<String> messages) {
         ArrayList<String> finalM = new ArrayList<>();
