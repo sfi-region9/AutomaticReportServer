@@ -20,6 +20,9 @@
 *.rar
 config.json
 src/main/resources/config.json
+src/main/java/fr/colin/arsreloaded/commands/LinkCommand.java
+src/main/java/fr/colin/arsreloaded/utils/DatabaseUserWrapper.java
+
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid
