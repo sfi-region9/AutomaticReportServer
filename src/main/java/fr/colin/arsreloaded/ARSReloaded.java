@@ -60,7 +60,7 @@ public class ARSReloaded {
         String SECRET = cf.getSECRET();
         TOKEN = cf.getTOKEN();
         db = new Database(cf.getDB_HOST(), cf.getDB_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
-        userDatabase = new Database(cf.getDB_HOST(), "uvrim_web", cf.getDB_USER(), cf.getDB_PASSWORD());
+        userDatabase = new Database(cf.getDB_HOST(), cf.getDB_USER_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
         wrapper = new DatabaseWrapper();
         wrapperD = new DatabaseUserWrapper();
         //Register commands

@@ -1,5 +1,7 @@
 package fr.colin.arsreloaded.configuration;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Config {
 
     private String ACCESS_TOKEN;
@@ -8,6 +10,7 @@ public class Config {
     private String TOKEN;
     private String DB_HOST;
     private String DB_NAME;
+    private String DB_USER_NAME;
     private String DB_USER;
 
     public String getACCESS_TOKEN() {
@@ -42,9 +45,13 @@ public class Config {
         return DB_PASSWORD;
     }
 
+    public String getDB_USER_NAME() {
+        return DB_USER_NAME;
+    }
+
     private String DB_PASSWORD;
 
-    public Config(String ACCESS_TOKEN, String ADMIN_ID, String SECRET, String TOKEN, String DB_HOST, String DB_NAME, String DB_USER, String DB_PASSWORD) {
+    public Config(String ACCESS_TOKEN, String ADMIN_ID, String SECRET, String TOKEN, String DB_HOST, String DB_NAME, String DB_USER, String DB_PASSWORD, String DB_USER_NAME) {
         this.ACCESS_TOKEN = ACCESS_TOKEN;
         this.ADMIN_ID = ADMIN_ID;
         this.SECRET = SECRET;
@@ -53,5 +60,6 @@ public class Config {
         this.DB_NAME = DB_NAME;
         this.DB_USER = DB_USER;
         this.DB_PASSWORD = DB_PASSWORD;
+        this.DB_USER_NAME =DB_USER_NAME;
     }
 }
