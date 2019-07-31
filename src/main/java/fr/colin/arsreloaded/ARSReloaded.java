@@ -10,6 +10,9 @@ import com.google.gson.Gson;
 import fr.colin.arsreloaded.commands.*;
 import fr.colin.arsreloaded.configuration.Config;
 import fr.colin.arsreloaded.configuration.ConfigWrapper;
+import fr.colin.arsreloaded.objects.CheckCo;
+import fr.colin.arsreloaded.objects.CheckVessel;
+import fr.colin.arsreloaded.objects.CheckVesselName;
 import fr.colin.arsreloaded.objects.Users;
 import fr.colin.arsreloaded.utils.Database;
 import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
@@ -37,6 +40,8 @@ public class ARSReloaded {
     private static String TOKEN = "";
 
     public static SimpleDateFormat DATE = new SimpleDateFormat("MMMM YYYY");
+    public static SimpleDateFormat DATE_M = new SimpleDateFormat("MMMM");
+    public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
 
     public static Database getDb() {
         return db;
@@ -90,6 +95,8 @@ public class ARSReloaded {
      */
     private static void setupRoutes() {
         get("/", (request, response) -> {
+            if (request.params().isEmpty())
+                return "Invalid";
             String sentToken = request.queryParams("hub.verify_token");
             if (sentToken.equalsIgnoreCase(TOKEN))
                 return request.queryParams("hub.challenge");
@@ -119,9 +126,27 @@ public class ARSReloaded {
             return "Save";
         });
 
+        post("/check_co", (request, response) -> {
+            String json = request.body();
+            CheckCo co = new Gson().fromJson(json, CheckCo.class);
+            return co.process();
+        });
+
+        post("/update_template", (request, response) -> {
+            String json = request.body();
+            CheckVessel v = new Gson().fromJson(json, CheckVessel.class);
+            return v.update();
+        });
+
         get("/send", (request, response) -> {
             new DatabaseWrapper().sendReports();
             return "congratulations";
+        });
+
+        post("/update_name", (request, response) -> {
+            String json = request.body();
+            CheckVesselName ns = new Gson().fromJson(json, CheckVesselName.class);
+            return ns.update();
         });
 
         post("/syncronize", (request, response) -> {

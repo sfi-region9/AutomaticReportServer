@@ -40,7 +40,7 @@ public class Users {
 
     public String constructReport(Vessel vessel) {
         ArrayList<String> str = new ArrayList<>();
-        str.add(vessel.getTemplate().replace("%name%", name).replace("%scc%", scc).replace("%date%", ARSReloaded.DATE.format(new Date(System.currentTimeMillis()))));
+        str.add(vessel.getTemplate().replace("%name%", name).replace("%scc%", scc).replace("%date%", ARSReloaded.DATE.format(new Date(System.currentTimeMillis()))).replace("%month%", ARSReloaded.DATE_M.format(new Date(System.currentTimeMillis()))).replace("%year%", ARSReloaded.DATE_Y.format(new Date(System.currentTimeMillis()))).replace("%vesselname%", vessel.getName().replace("_", " ")));
         str.addAll(Arrays.asList(report.split("\n")));
         return StringUtils.join(str, "\n");
     }

@@ -145,11 +145,23 @@ public class DatabaseWrapper {
         return new Vessel(rs.getString("name").replace("_", " "), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
     }
 
+    public boolean isCo(String vesselid, String coid) throws SQLException {
+        return db.getResult("SELECT * FROM vessels WHERE coid='" + coid + "' AND vesselid='" + vesselid + "'").next();
+    }
+
     public void changeVesselTemplate(Vessel vessel, String template) {
         db.update("UPDATE vessels SET template='" + template + "' WHERE vesselid='" + vessel.getVesselid() + "'");
     }
+    public void changeVesselTemplate(String vesselid, String template) {
+        db.update("UPDATE vessels SET template='" + template + "' WHERE vesselid='" + vesselid + "'");
+    }
+
+
     public void changeVesselDefaultReport(Vessel vessel, String defaul) {
         db.update("UPDATE vessels SET default_text='" + defaul + "' WHERE vesselid='" + vessel.getVesselid() + "'");
+    }
+    public void changeVesselDefaultReport(String vesselid, String defaul) {
+        db.update("UPDATE vessels SET default_text='" + defaul + "' WHERE vesselid='" + vesselid + "'");
     }
 
     /**
