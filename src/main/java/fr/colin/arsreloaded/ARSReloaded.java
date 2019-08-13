@@ -54,6 +54,7 @@ public class ARSReloaded {
     public static void main(String... args) {
 
         //Load configuration
+        System.out.println("test");
         Config cf = new ConfigWrapper().getConfig();
         String ACCES_TOKEN = cf.getACCESS_TOKEN();
         ADMIN_ID = cf.getADMIN_ID();
@@ -95,7 +96,7 @@ public class ARSReloaded {
      */
     private static void setupRoutes() {
         get("/", (request, response) -> {
-            if (request.params().isEmpty())
+            if (request.queryParams().isEmpty())
                 return "Invalid";
             String sentToken = request.queryParams("hub.verify_token");
             if (sentToken.equalsIgnoreCase(TOKEN))
@@ -119,6 +120,13 @@ public class ARSReloaded {
             return "User successfully uploaded";
         });
 
+        post("/destroy_user", (request, response) -> {
+            String json = request.body();
+            Users users = new Gson().fromJson(json, Users.class);
+            getWrapper().destroyUser(users);
+            return "user successfully removed";
+        });
+
         post("/submit", (request, response) -> {
             String json = request.body();
             Users users = new Gson().fromJson(json, Users.class);
@@ -138,8 +146,17 @@ public class ARSReloaded {
             return v.update();
         });
 
+        post("/switch_vessel", (request, response) -> {
+            String json = request.body();
+            Users users = new Gson().fromJson(json, Users.class);
+            return getWrapper().switchVessel(users, users.getVesselid());
+        });
+
         get("/send", (request, response) -> {
-            new DatabaseWrapper().sendReports();
+            if (request.queryParams().isEmpty())
+                return false;
+            if (request.queryParams("password").contains("accessgranted"))
+                new DatabaseWrapper().sendReports();
             return "congratulations";
         });
 
@@ -154,6 +171,8 @@ public class ARSReloaded {
             Users users = new Gson().fromJson(json, Users.class);
             return getWrapper().getReport(users);
         });
+
+        get("/allvessels", (request, response) -> new Gson().toJson(getWrapper().allVessels()));
 
 
         get("/send", (request, response) -> getWrapper().sendReports());
@@ -199,8 +218,9 @@ public class ARSReloaded {
             sendMessage(recipientID, "No commands are registred, please contact the administrator for any further help.");
             return;
         } else {
-            message.add("■ Help for Commands, all commands start from '!' character");
-            message.add("■ The [] means an required arg and {} means an optional arg");
+            message.add("■ Help for Commands, all commands start with '!' character");
+            message.add("■ [] => required argument\n" +
+                    "■ {} => optional argument");
             message.add("");
             for (Command c : Command.commands.values()) {
                 if (!c.hidden) {

@@ -6,6 +6,7 @@ import fr.colin.arsreloaded.objects.Vessel;
 import fr.colin.arsreloaded.objects.VesselNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -152,6 +153,7 @@ public class DatabaseWrapper {
     public void changeVesselTemplate(Vessel vessel, String template) {
         db.update("UPDATE vessels SET template='" + template + "' WHERE vesselid='" + vessel.getVesselid() + "'");
     }
+
     public void changeVesselTemplate(String vesselid, String template) {
         db.update("UPDATE vessels SET template='" + template + "' WHERE vesselid='" + vesselid + "'");
     }
@@ -160,8 +162,20 @@ public class DatabaseWrapper {
     public void changeVesselDefaultReport(Vessel vessel, String defaul) {
         db.update("UPDATE vessels SET default_text='" + defaul + "' WHERE vesselid='" + vessel.getVesselid() + "'");
     }
+
     public void changeVesselDefaultReport(String vesselid, String defaul) {
         db.update("UPDATE vessels SET default_text='" + defaul + "' WHERE vesselid='" + vesselid + "'");
+    }
+
+    public ArrayList<Vessel> allVessels() throws SQLException {
+        ResultSet rs = db.getResult("SELECT * FROM vessels");
+        ArrayList<Vessel> v = new ArrayList<>();
+
+        while (rs.next()) {
+            v.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text")));
+        }
+
+        return v;
     }
 
     /**
@@ -199,7 +213,31 @@ public class DatabaseWrapper {
     public void register(Users user) {
         if (exist(user))
             return;
-        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report) VALUES('%s','%s','%s','Nothing to report')", user.getName(), user.getScc(), user.getVesselid()));
+        Vessel v;
+        try {
+            v = fromId(user.getVesselid());
+        } catch (SQLException e) {
+            return;
+        }
+        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report) VALUES('%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.getDefaul()));
+    }
+
+    public boolean switchVessel(Users u, String vesselid){
+        if(!exist(u))
+            return false;
+        db.update("UPDATE users SET vesselid='" + vesselid + "' WHERE scc='" + u.getScc() + "'");
+        return true;
+    }
+
+
+    public void destroyUser(Users u){
+        db.update("DELETE FROM users WHERE scc='" + u.getScc() + "'");
+    }
+
+    public Vessel fromId(String vesselID) throws SQLException {
+        ResultSet rs = db.getResult("SELECT * FROM vessels WHERE vesselid='" + vesselID + "'");
+        rs.next();
+        return new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
     }
 
     /**

@@ -17,7 +17,7 @@ public class HelpCommand extends Command {
 
     @Override
     public String usage() {
-        return "show the actual help topic";
+        return "shows help topic";
     }
 
     @Override

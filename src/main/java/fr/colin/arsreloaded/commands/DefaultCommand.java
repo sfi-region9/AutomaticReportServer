@@ -46,7 +46,7 @@ public class DefaultCommand extends Command {
 
     @Override
     public String usage() {
-        return "allow you to alter the default report of your chapter reports.";
+        return "allows you to alter the default report of your chapter reports.";
     }
 
     @Override
