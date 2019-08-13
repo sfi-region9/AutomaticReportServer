@@ -1,14 +1,15 @@
 <h1>ARS Reloaded</h1>
 <h2>Server</h2>
-<p>The Automatic Report Server is the new and easiest way to setup easily a report system for your chapter.</p>
+<p>
+The Automatic Report Server (in short ARS) is the new and easiest way to setup easily a monthly report system for your chapter.</p>
 <h3>NEW !</h3>
 <a href="https://documentation.nwa2coco.fr/">Official Documentation !!!</a>
 <br>
 <h3>How to Register<h3>
-<p>It's very simple, talk about that to your CO and if he/she interested talk to the Automatic Report Server Bot at https://m.me/arsserverreloaded and stat a new conversation. <br> the command !help or any word trigger the help method and you can see all the commands, the most important is !subscribe, this command allow your CO to register the chapter, after a quick review the administrator accept or not the register ! And that is it ! <br> You can now use the clients like https://github.com/coco33920/AutomaticReportClient or any client you build :) ( API use in wiki ! )</p>
+<p>It's very simple, talk about that to your CO and if he/she is interested go talk to the Automatic Report Server Bot at https://m.me/arsserverreloaded and stat a new conversation. <br> the command !help or any word trigger the help method and shows you all the commands, the most important is !subscribe, this command allow your CO to register the chapter, after a quick review the administrator will accept or not the register ! And that is it ! <br> You can now use the clients like https://github.com/coco33920/AutomaticReportClient or any client you build :) ( API use in wiki ! )</p>
   
 <br><br>
-<h3>How it's work ?</h3>
+<h3>How does it work ?</h3>
 <p>It's an HTTP Api connected to the SEND Api of facebook with the library messenger4j, it has 4 endpoints <br>
 the / hook the facebook webhook
 the /register_user register a new user ( not vessels ) who want to use the system
