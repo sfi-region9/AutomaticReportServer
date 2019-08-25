@@ -28,6 +28,7 @@ public class LinkCommand extends Command {
         sendMessage(senderID, "Your messengerid was successfully linked to your ARW account !");
     }
 
+
     @Override
     public String usage() {
         return "link your website account with your messenger account";

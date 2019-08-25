@@ -121,21 +121,19 @@ public class ARSReloaded {
         post("/destroy_user", (request, response) -> {
             String json = request.body();
             Users users = new Gson().fromJson(json, Users.class);
-            getWrapper().destroyUser(users);
-            return "user successfully removed";
+            return getWrapper().destroyUser(users);
         });
 
         post("/submit", (request, response) -> {
             String json = request.body();
             Users users = new Gson().fromJson(json, Users.class);
-            getWrapper().saveReport(users);
-            return "Save";
+            return getWrapper().saveReport(users);
         });
 
-        get("/verify_token",(request, response) -> {
-            if(request.queryParams().isEmpty())
+        get("/verify_token", (request, response) -> {
+            if (request.queryParams().isEmpty())
                 return "Error please send params";
-            if(request.queryParams().size() < 2)
+            if (request.queryParams().size() < 2)
                 return "Error please send params";
             String scc = request.queryParams("scc");
             String token = request.queryParams("token");

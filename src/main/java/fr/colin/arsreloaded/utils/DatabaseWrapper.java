@@ -219,22 +219,30 @@ public class DatabaseWrapper {
         } catch (SQLException e) {
             return;
         }
-        if(user.getUuid().equalsIgnoreCase("defaultuuid"))
+        if (user.getUuid().equalsIgnoreCase("defaultuuid"))
             return;
 
         db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.getDefaul(), user.getUuid()));
     }
 
-    public boolean switchVessel(Users u, String vesselid){
-        if(!exist(u))
+    public boolean switchVessel(Users u, String vesselid) {
+        if (!exist(u))
             return false;
+        if (!verifyToken(u.getScc(), u.getUuid())) {
+            return false;
+        }
         db.update("UPDATE users SET vesselid='" + vesselid + "' WHERE scc='" + u.getScc() + "'");
         return true;
     }
 
 
-    public void destroyUser(Users u){
+    public String destroyUser(Users u) {
+        if (!verifyToken(u.getScc(), u.getUuid())) {
+            return "ID Invalid";
+        }
+
         db.update("DELETE FROM users WHERE scc='" + u.getScc() + "'");
+        return "User removed";
     }
 
     public Vessel fromId(String vesselID) throws SQLException {
@@ -248,20 +256,23 @@ public class DatabaseWrapper {
      *
      * @param users The User object with the report
      */
-    public void saveReport(Users users) {
+    public String saveReport(Users users) {
         if (!exist(users)) {
             register(users);
         }
+        if (!verifyToken(users.getScc(), users.getUuid())) {
+            return "ID Invalid";
+        }
         db.update(String.format("UPDATE `users` SET report='" + users.getReport().replace("\n", "\\n") + "' WHERE scc='" + users.getScc() + "'"));
+        return "Save";
     }
 
 
-
-    public boolean verifyToken(String scc, String token){
+    public boolean verifyToken(String scc, String token) {
         String storedToken = "";
         ResultSet rs = db.getResult("SELECT * FROM users WHERE scc='" + scc + "'");
         try {
-            if(!rs.next())
+            if (!rs.next())
                 return false;
             storedToken = rs.getString("uuid");
             return storedToken.equals(token);
@@ -280,6 +291,9 @@ public class DatabaseWrapper {
         if (!exist(users)) {
             register(users);
             return "Nothing to report";
+        }
+        if (!verifyToken(users.getScc(), users.getUuid())) {
+            return "ID Invalid";
         }
         return ((String) db.read("SELECT * FROM `users` WHERE scc='" + users.getScc() + "'", "report")).replace("\n", "\\n");
     }
