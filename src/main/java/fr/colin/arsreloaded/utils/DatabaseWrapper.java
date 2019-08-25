@@ -219,7 +219,10 @@ public class DatabaseWrapper {
         } catch (SQLException e) {
             return;
         }
-        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report) VALUES('%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.getDefaul()));
+        if(user.getUuid().equalsIgnoreCase("defaultuuid"))
+            return;
+
+        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.getDefaul(), user.getUuid()));
     }
 
     public boolean switchVessel(Users u, String vesselid){
@@ -250,6 +253,21 @@ public class DatabaseWrapper {
             register(users);
         }
         db.update(String.format("UPDATE `users` SET report='" + users.getReport().replace("\n", "\\n") + "' WHERE scc='" + users.getScc() + "'"));
+    }
+
+
+
+    public boolean verifyToken(String scc, String token){
+        String storedToken = "";
+        ResultSet rs = db.getResult("SELECT * FROM users WHERE scc='" + scc + "'");
+        try {
+            if(!rs.next())
+                return false;
+            storedToken = rs.getString("uuid");
+            return storedToken.equals(token);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     /**
@@ -285,11 +303,10 @@ public class DatabaseWrapper {
             ArrayList<Users> tempUsers = new ArrayList<>();
             ResultSet r = db.getResult("SELECT * FROM `users` where vesselid = '" + v.getVesselid() + "'");
             while (r.next()) {
-                tempUsers.add(new Users(r.getString("name"), r.getString("scc"), r.getString("vesselid"), r.getString("report")));
+                tempUsers.add(new Users(r.getString("name"), r.getString("scc"), r.getString("vesselid"), r.getString("report"), r.getString("uuid")));
             }
             users.put(v, tempUsers);
         }
-        System.out.println(users.size());
 
         for (Vessel v : users.keySet()) {
             ArrayList<String> message = new ArrayList<>();

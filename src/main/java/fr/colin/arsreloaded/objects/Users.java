@@ -13,7 +13,16 @@ public class Users {
     private String scc;
     private String vesselid;
     private String report = "";
+    private String uuid = "defaultuuid";
 
+
+    public Users(String name, String scc, String vesselid, String report, String uuid) {
+        this.name = name;
+        this.scc = scc;
+        this.vesselid = vesselid;
+        this.report = report;
+        this.uuid = uuid;
+    }
 
     public Users(String name, String scc, String vesselid, String report) {
         this.name = name;
@@ -36,6 +45,10 @@ public class Users {
 
     public String getScc() {
         return scc;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public String constructReport(Vessel vessel) {

@@ -52,9 +52,7 @@ public class ARSReloaded {
     }
 
     public static void main(String... args) {
-
-        //Load configuration
-        System.out.println("test");
+        //Load configuratbion
         Config cf = new ConfigWrapper().getConfig();
         String ACCES_TOKEN = cf.getACCESS_TOKEN();
         ADMIN_ID = cf.getADMIN_ID();
@@ -132,6 +130,16 @@ public class ARSReloaded {
             Users users = new Gson().fromJson(json, Users.class);
             getWrapper().saveReport(users);
             return "Save";
+        });
+
+        get("/verify_token",(request, response) -> {
+            if(request.queryParams().isEmpty())
+                return "Error please send params";
+            if(request.queryParams().size() < 2)
+                return "Error please send params";
+            String scc = request.queryParams("scc");
+            String token = request.queryParams("token");
+            return getWrapper().verifyToken(scc, token);
         });
 
         post("/check_co", (request, response) -> {
