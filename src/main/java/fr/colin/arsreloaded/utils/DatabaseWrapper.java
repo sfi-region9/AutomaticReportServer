@@ -222,7 +222,7 @@ public class DatabaseWrapper {
         if (user.getUuid().equalsIgnoreCase("defaultuuid"))
             return;
 
-        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.getDefaul(), user.getUuid()));
+        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.getDefaul(), user.getUuid()));
     }
 
     public boolean switchVessel(Users u, String vesselid) {

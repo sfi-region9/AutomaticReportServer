@@ -51,7 +51,7 @@ public class ARSReloaded {
         return wrapper;
     }
 
-    public static void main(String... args) {
+    public static void main(String... args) throws InterruptedException {
         //Load configuratbion
         Config cf = new ConfigWrapper().getConfig();
         String ACCES_TOKEN = cf.getACCESS_TOKEN();
@@ -76,12 +76,18 @@ public class ARSReloaded {
             System.out.println("Registred Command : " + c.getName());
         }
 
+        Thread.sleep(100);
+        System.out.println("   ");
+        System.out.println("Welcome in ARS v1.5");
+        System.out.println("   ");
+        Thread.sleep(100);
         //Build messenger
         try {
             messenger = Messenger.create(ACCES_TOKEN, SECRET, TOKEN);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        ipAddress("127.0.0.1");
         port(5555);
         setupRoutes();
 
