@@ -6,7 +6,7 @@
     <groupId>fr.colin.ars</groupId>
     <artifactId>ARS-Reloaded</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.5</version>
     <build>
         <plugins>
             <plugin>
