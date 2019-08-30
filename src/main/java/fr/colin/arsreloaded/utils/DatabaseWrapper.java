@@ -30,6 +30,7 @@ public class DatabaseWrapper {
         }
     }
 
+
     /**
      * Method to get all pending vessels in order to accept/deny them
      *
@@ -298,6 +299,24 @@ public class DatabaseWrapper {
         return ((String) db.read("SELECT * FROM `users` WHERE scc='" + users.getScc() + "'", "report")).replace("\n", "\\n");
     }
 
+    public Users syncronizeUser(Users users) {
+        if (!exist(users)) {
+            register(users);
+            return users;
+        }
+        if (!verifyToken(users.getScc(), users.getUuid())) {
+            return new Users("invalidID", "", "", "");
+        }
+        ResultSet rs = db.getResult("SELECT * FROM users WHERE scc='" + users.getScc() + "'");
+        try {
+            rs.next();
+            return new Users(rs.getString("name"), rs.getString("scc"), rs.getString("vesselid"), rs.getString("report"), rs.getString("uuid"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new Users("invalidID", "", "", "");
+    }
+
     /**
      * Method to send all reports of all user to their respective CO
      *
@@ -337,7 +356,7 @@ public class DatabaseWrapper {
             message.add("End of " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
             ARSReloaded.sendMessage(v.getCoid(), StringUtils.join(message, "\n"));
         }
-
+        setLast();
         return "Report";
     }
 

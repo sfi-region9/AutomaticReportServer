@@ -79,6 +79,8 @@ public class ARSReloaded {
         Thread.sleep(100);
         System.out.println("   ");
         System.out.println("Welcome in ARS v1.5");
+        Locale.setDefault(Locale.FRANCE);
+        System.out.println("Start Time : " + new SimpleDateFormat("hh:mm:ss dd:MM:YYYY").format(new Date(System.currentTimeMillis())));
         System.out.println("   ");
         Thread.sleep(100);
         //Build messenger
@@ -182,6 +184,12 @@ public class ARSReloaded {
             String json = request.body();
             Users users = new Gson().fromJson(json, Users.class);
             return getWrapper().getReport(users);
+        });
+
+        post("/syncronize_user", (request, response) -> {
+            String json = request.body();
+            Users s = new Gson().fromJson(json, Users.class);
+            return new Gson().toJson(getWrapper().syncronizeUser(s));
         });
 
         get("/allvessels", (request, response) -> new Gson().toJson(getWrapper().allVessels()));

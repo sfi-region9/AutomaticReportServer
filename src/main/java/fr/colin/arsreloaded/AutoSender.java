@@ -54,6 +54,7 @@ public class AutoSender implements Runnable {
                 System.out.println("Time is now :D !");
                 try {
                     getWrapper().sendReports();
+                    getWrapper().setLast();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -63,7 +64,7 @@ public class AutoSender implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                getWrapper().setLast();
+
             }
             //function
             try {
