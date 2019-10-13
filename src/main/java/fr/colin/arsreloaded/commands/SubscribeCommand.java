@@ -1,13 +1,15 @@
 package fr.colin.arsreloaded.commands;
 
-import fr.colin.arsreloaded.Command;
+import fr.colin.arsreloaded.plugins.Command;
 import org.apache.commons.lang3.StringUtils;
+import org.pf4j.Extension;
 
 import java.sql.SQLException;
 import java.util.Arrays;
 
 import static fr.colin.arsreloaded.ARSReloaded.*;
 
+@Extension
 public class SubscribeCommand extends Command {
     public SubscribeCommand() {
         super("subscribe", "sub", "register", "r");

@@ -1,9 +1,10 @@
 package fr.colin.arsreloaded.commands;
 
 import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.Command;
+import fr.colin.arsreloaded.plugins.Command;
 import fr.colin.arsreloaded.objects.Vessel;
 import fr.colin.arsreloaded.utils.DatabaseWrapper;
+import org.pf4j.Extension;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import static fr.colin.arsreloaded.ARSReloaded.sendMessage;
 import static fr.colin.arsreloaded.ARSReloaded.sendMultiMessage;
 
+@Extension
 public class DefaultCommand extends Command {
 
     public DefaultCommand() {

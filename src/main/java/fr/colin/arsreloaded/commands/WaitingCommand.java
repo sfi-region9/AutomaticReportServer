@@ -1,13 +1,15 @@
 package fr.colin.arsreloaded.commands;
 
-import fr.colin.arsreloaded.Command;
+import fr.colin.arsreloaded.plugins.Command;
 import fr.colin.arsreloaded.objects.VesselNotFoundException;
+import org.pf4j.Extension;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 import static fr.colin.arsreloaded.ARSReloaded.*;
 
+@Extension
 public class WaitingCommand extends Command {
     public WaitingCommand() {
         super("wait", "wa");

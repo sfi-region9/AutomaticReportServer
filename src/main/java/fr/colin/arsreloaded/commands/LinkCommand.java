@@ -1,11 +1,13 @@
 package fr.colin.arsreloaded.commands;
 
 import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.Command;
+import fr.colin.arsreloaded.plugins.Command;
 import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
+import org.pf4j.Extension;
 
 import static fr.colin.arsreloaded.ARSReloaded.*;
 
+@Extension
 public class LinkCommand extends Command {
     public LinkCommand() {
         super("link", "linking");

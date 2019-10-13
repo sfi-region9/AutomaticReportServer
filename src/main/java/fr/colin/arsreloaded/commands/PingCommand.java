@@ -1,8 +1,10 @@
 package fr.colin.arsreloaded.commands;
 
 import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.Command;
+import fr.colin.arsreloaded.plugins.Command;
+import org.pf4j.Extension;
 
+@Extension
 public class PingCommand extends Command {
 
     public PingCommand() {

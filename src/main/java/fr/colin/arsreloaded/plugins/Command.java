@@ -1,4 +1,6 @@
-package fr.colin.arsreloaded;
+package fr.colin.arsreloaded.plugins;
+
+import org.pf4j.ExtensionPoint;
 
 import java.util.HashMap;
 
@@ -6,9 +8,10 @@ import java.util.HashMap;
  * Abstract class to handle command request from the messenger bot
  */
 
-public abstract class Command {
+public abstract class Command implements ExtensionPoint {
 
     private String name;
+    private String aliases[];
     protected boolean hidden = false;
 
 
@@ -17,8 +20,12 @@ public abstract class Command {
 
     public Command(String name, String... alias) {
         this.name = name;
+        this.aliases = alias;
+    }
+
+    public void register() {
         commands.put(name, this);
-        for (String s : alias) {
+        for (String s : aliases) {
             Command.alias.put(s, this);
         }
     }
@@ -28,6 +35,10 @@ public abstract class Command {
     public abstract String usage();
 
     public abstract String args();
+
+    public boolean isHidden() {
+        return hidden;
+    }
 
     public String getName() {
         return name;

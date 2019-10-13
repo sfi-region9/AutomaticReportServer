@@ -7,13 +7,13 @@ import com.github.messenger4j.send.MessagePayload;
 import com.github.messenger4j.send.MessagingType;
 import com.github.messenger4j.send.message.TextMessage;
 import com.google.gson.Gson;
-import fr.colin.arsreloaded.commands.*;
 import fr.colin.arsreloaded.configuration.Config;
 import fr.colin.arsreloaded.configuration.ConfigWrapper;
 import fr.colin.arsreloaded.objects.CheckCo;
 import fr.colin.arsreloaded.objects.CheckVessel;
 import fr.colin.arsreloaded.objects.CheckVesselName;
 import fr.colin.arsreloaded.objects.Users;
+import fr.colin.arsreloaded.plugins.Command;
 import fr.colin.arsreloaded.plugins.ReportProcessing;
 import fr.colin.arsreloaded.utils.Database;
 import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
@@ -66,7 +66,6 @@ public class ARSReloaded {
 
         loadARS();
 
-
     }
 
     public static void loadDatabases() {
@@ -79,21 +78,6 @@ public class ARSReloaded {
         userDatabase = new Database(cf.getDB_HOST(), cf.getDB_USER_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
         wrapper = new DatabaseWrapper();
         wrapperD = new DatabaseUserWrapper();
-    }
-
-    public static void loadCommands() {
-        new HelpCommand();
-        new PingCommand();
-
-        new WaitingCommand();
-        new SubscribeCommand();
-        new AboutCommand();
-        new DefaultCommand();
-        new TemplateCommand();
-        new LinkCommand();
-        for (Command c : Command.commands.values()) {
-            System.out.println("Registred Command : " + c.getName());
-        }
     }
 
     public static void loadPlugins() throws SQLException {
@@ -113,6 +97,11 @@ public class ARSReloaded {
                 continue;
             processingHashMap.put(processing.getVesselID(), processing);
             System.out.println(processing.getVesselID() + " plugin was added to the server");
+        }
+
+        for (Command command : plugins.getExtensions(Command.class)) {
+            command.register();
+            System.out.println("Register command : " + command.getName() + " from " + command.getClass().getName());
         }
 
 
@@ -139,9 +128,9 @@ public class ARSReloaded {
 
     public static void loadARS() throws InterruptedException, SQLException {
         loadDatabases();
-        loadCommands();
-        loadSpark();
         loadPlugins();
+        loadSpark();
+
 
         Thread verifier = new Thread(new AutoSender());
         verifier.start();
@@ -293,7 +282,7 @@ public class ARSReloaded {
                     "■ {} => optional argument");
             message.add("");
             for (Command c : Command.commands.values()) {
-                if (!c.hidden) {
+                if (!c.isHidden()) {
                     message.add("● !" + c.getName() + c.args() + " ⇒ " + c.usage());
                 }
             }
