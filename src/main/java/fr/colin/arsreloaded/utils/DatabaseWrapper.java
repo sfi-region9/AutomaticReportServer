@@ -4,6 +4,7 @@ import fr.colin.arsreloaded.ARSReloaded;
 import fr.colin.arsreloaded.objects.Users;
 import fr.colin.arsreloaded.objects.Vessel;
 import fr.colin.arsreloaded.objects.VesselNotFoundException;
+import fr.colin.arsreloaded.plugins.ReportProcessing;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Array;
@@ -351,6 +352,9 @@ public class DatabaseWrapper {
                 message.add(u.constructReport(v));
                 message.add("--------------------------------------------------------------------");
                 db.update("UPDATE `users` SET report='" + v.getDefaul() + "' WHERE scc='" + u.getScc() + "'");
+                ReportProcessing rp = ARSReloaded.processingHashMap.get(v.getVesselid());
+                if (rp != null)
+                    rp.process(u, v);
             }
             message.add(" ");
             message.add("End of " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");

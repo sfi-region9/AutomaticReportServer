@@ -15,6 +15,7 @@ public class ConfigWrapper {
 
     public ConfigWrapper() {
         InputStream in = getClass().getResourceAsStream("/config.json");
+        System.out.println(in == null);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         rawConfig = StringUtils.join(br.lines().toArray());
     }

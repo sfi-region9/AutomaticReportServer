@@ -12,7 +12,7 @@ public class PingCommand extends Command {
     @Override
     public void onCommand(String senderID, String text, String[] args) {
         System.out.println("Ping Command received from " + senderID);
-        ARSReloaded.sendMessage(senderID, "Pong !!, Version 1.0, Developed by Lieutenant Colin THOMAS");
+        ARSReloaded.sendMessage(senderID, "Pong !!, Version v1.5, Developed by Lieutenant Colin THOMAS");
     }
 
     @Override

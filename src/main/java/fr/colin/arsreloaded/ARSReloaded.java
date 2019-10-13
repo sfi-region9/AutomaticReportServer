@@ -14,11 +14,16 @@ import fr.colin.arsreloaded.objects.CheckCo;
 import fr.colin.arsreloaded.objects.CheckVessel;
 import fr.colin.arsreloaded.objects.CheckVesselName;
 import fr.colin.arsreloaded.objects.Users;
+import fr.colin.arsreloaded.plugins.ReportProcessing;
 import fr.colin.arsreloaded.utils.Database;
 import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
 import fr.colin.arsreloaded.utils.DatabaseWrapper;
 import org.apache.commons.lang3.StringUtils;
+import org.pf4j.JarPluginManager;
+import org.pf4j.PluginManager;
 
+import java.io.File;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -38,10 +43,16 @@ public class ARSReloaded {
 
     public static String ADMIN_ID = "";
     private static String TOKEN = "";
+    private static String ACCES_TOKEN = "";
+    private static String SECRET = "";
 
-    public static SimpleDateFormat DATE = new SimpleDateFormat("MMMM YYYY");
-    public static SimpleDateFormat DATE_M = new SimpleDateFormat("MMMM");
+    public static HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
+
+    public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
+    public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
     public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
+
+    public static PluginManager plugins;
 
     public static Database getDb() {
         return db;
@@ -51,18 +62,26 @@ public class ARSReloaded {
         return wrapper;
     }
 
-    public static void main(String... args) throws InterruptedException {
-        //Load configuratbion
+    public static void main(String... args) throws InterruptedException, SQLException {
+
+        loadARS();
+
+
+    }
+
+    public static void loadDatabases() {
         Config cf = new ConfigWrapper().getConfig();
-        String ACCES_TOKEN = cf.getACCESS_TOKEN();
         ADMIN_ID = cf.getADMIN_ID();
-        String SECRET = cf.getSECRET();
         TOKEN = cf.getTOKEN();
+        ACCES_TOKEN = cf.getACCESS_TOKEN();
+        SECRET = cf.getSECRET();
         db = new Database(cf.getDB_HOST(), cf.getDB_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
         userDatabase = new Database(cf.getDB_HOST(), cf.getDB_USER_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
         wrapper = new DatabaseWrapper();
         wrapperD = new DatabaseUserWrapper();
-        //Register commands
+    }
+
+    public static void loadCommands() {
         new HelpCommand();
         new PingCommand();
 
@@ -75,12 +94,36 @@ public class ARSReloaded {
         for (Command c : Command.commands.values()) {
             System.out.println("Registred Command : " + c.getName());
         }
+    }
 
+    public static void loadPlugins() throws SQLException {
+        processingHashMap.clear();
+        File f = new File("plugins/");
+        if (!f.exists())
+            f.mkdir();
+        System.out.println(f.getAbsolutePath());
+        plugins = new JarPluginManager(f.toPath());
+        plugins.loadPlugins();
+        plugins.startPlugins();
+
+        for (ReportProcessing processing : plugins.getExtensions(ReportProcessing.class)) {
+            if (!getWrapper().isCo(processing.getVesselID(), processing.getID()))
+                continue;
+            if (processingHashMap.containsKey(processing.getVesselID()))
+                continue;
+            processingHashMap.put(processing.getVesselID(), processing);
+            System.out.println(processing.getVesselID() + " plugin was added to the server");
+        }
+
+
+    }
+
+    public static void loadSpark() throws InterruptedException {
         Thread.sleep(100);
         System.out.println("   ");
         System.out.println("Welcome in ARS v1.5");
         Locale.setDefault(Locale.FRANCE);
-        System.out.println("Start Time : " + new SimpleDateFormat("hh:mm:ss dd:MM:YYYY").format(new Date(System.currentTimeMillis())));
+        System.out.println("Start Time : " + new SimpleDateFormat("dd/MM/YYYY hh:mm:ss").format(new Date(System.currentTimeMillis())));
         System.out.println("   ");
         Thread.sleep(100);
         //Build messenger
@@ -92,6 +135,13 @@ public class ARSReloaded {
         ipAddress("127.0.0.1");
         port(5555);
         setupRoutes();
+    }
+
+    public static void loadARS() throws InterruptedException, SQLException {
+        loadDatabases();
+        loadCommands();
+        loadSpark();
+        loadPlugins();
 
         Thread verifier = new Thread(new AutoSender());
         verifier.start();
