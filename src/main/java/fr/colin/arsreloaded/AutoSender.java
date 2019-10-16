@@ -1,6 +1,6 @@
 package fr.colin.arsreloaded;
 
-import fr.colin.arsreloaded.utils.DatabaseWrapper;
+import fr.colin.arsreloaded.databases.DatabaseWrapper;
 
 import java.sql.SQLException;
 import java.util.Calendar;

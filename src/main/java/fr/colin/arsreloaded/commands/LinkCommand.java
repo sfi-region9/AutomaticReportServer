@@ -2,7 +2,7 @@ package fr.colin.arsreloaded.commands;
 
 import fr.colin.arsreloaded.ARSReloaded;
 import fr.colin.arsreloaded.plugins.Command;
-import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
+import fr.colin.arsreloaded.databases.DatabaseUserWrapper;
 import org.pf4j.Extension;
 
 import static fr.colin.arsreloaded.ARSReloaded.*;

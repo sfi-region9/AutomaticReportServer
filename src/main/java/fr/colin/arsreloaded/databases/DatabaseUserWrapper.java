@@ -1,4 +1,4 @@
-package fr.colin.arsreloaded.utils;
+package fr.colin.arsreloaded.databases;
 
 import fr.colin.arsreloaded.ARSReloaded;
 

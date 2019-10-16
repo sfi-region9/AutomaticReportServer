@@ -1,13 +1,13 @@
-package fr.colin.arsreloaded.utils;
+package fr.colin.arsreloaded.databases;
 
 import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.objects.Users;
-import fr.colin.arsreloaded.objects.Vessel;
-import fr.colin.arsreloaded.objects.VesselNotFoundException;
+import fr.colin.arsreloaded.plugins.ProcessAllReports;
+import fr.colin.arsreloaded.utils.Users;
+import fr.colin.arsreloaded.utils.Vessel;
+import fr.colin.arsreloaded.utils.VesselNotFoundException;
 import fr.colin.arsreloaded.plugins.ReportProcessing;
 import org.apache.commons.lang3.StringUtils;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -347,15 +347,24 @@ public class DatabaseWrapper {
             message.add("Starting " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
             message.add("--------------------------------------------------------------------");
             message.add(" ");
+            Users[] s = new Users[users.get(v).size()];
+            int index = 0;
             for (Users u : users.get(v)) {
                 System.out.println(u.getVesselid() + " " + u.getScc() + " " + v.getCoid() + " " + (ARSReloaded.messenger == null));
                 message.add(u.constructReport(v));
                 message.add("--------------------------------------------------------------------");
                 db.update("UPDATE `users` SET report='" + v.getDefaul() + "' WHERE scc='" + u.getScc() + "'");
                 ReportProcessing rp = ARSReloaded.processingHashMap.get(v.getVesselid());
+
                 if (rp != null)
                     rp.process(u, v);
+                s[index] = u;
+                index++;
             }
+            ProcessAllReports par = ARSReloaded.processings.get(v.getVesselid());
+            if(par != null)
+                par.process(s, v);
+
             message.add(" ");
             message.add("End of " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
             ARSReloaded.sendMessage(v.getCoid(), StringUtils.join(message, "\n"));

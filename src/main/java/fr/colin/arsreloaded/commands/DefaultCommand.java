@@ -2,8 +2,8 @@ package fr.colin.arsreloaded.commands;
 
 import fr.colin.arsreloaded.ARSReloaded;
 import fr.colin.arsreloaded.plugins.Command;
-import fr.colin.arsreloaded.objects.Vessel;
-import fr.colin.arsreloaded.utils.DatabaseWrapper;
+import fr.colin.arsreloaded.utils.Vessel;
+import fr.colin.arsreloaded.databases.DatabaseWrapper;
 import org.pf4j.Extension;
 
 import java.sql.SQLException;

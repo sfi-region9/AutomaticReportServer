@@ -9,15 +9,16 @@ import com.github.messenger4j.send.message.TextMessage;
 import com.google.gson.Gson;
 import fr.colin.arsreloaded.configuration.Config;
 import fr.colin.arsreloaded.configuration.ConfigWrapper;
-import fr.colin.arsreloaded.objects.CheckCo;
-import fr.colin.arsreloaded.objects.CheckVessel;
-import fr.colin.arsreloaded.objects.CheckVesselName;
-import fr.colin.arsreloaded.objects.Users;
+import fr.colin.arsreloaded.plugins.ProcessAllReports;
+import fr.colin.arsreloaded.utils.CheckCo;
+import fr.colin.arsreloaded.utils.CheckVessel;
+import fr.colin.arsreloaded.utils.CheckVesselName;
+import fr.colin.arsreloaded.utils.Users;
 import fr.colin.arsreloaded.plugins.Command;
 import fr.colin.arsreloaded.plugins.ReportProcessing;
-import fr.colin.arsreloaded.utils.Database;
-import fr.colin.arsreloaded.utils.DatabaseUserWrapper;
-import fr.colin.arsreloaded.utils.DatabaseWrapper;
+import fr.colin.arsreloaded.databases.Database;
+import fr.colin.arsreloaded.databases.DatabaseUserWrapper;
+import fr.colin.arsreloaded.databases.DatabaseWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -47,6 +48,7 @@ public class ARSReloaded {
     private static String SECRET = "";
 
     public static HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
+    public static HashMap<String, ProcessAllReports> processings = new HashMap<>();
 
     public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
     public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
@@ -63,12 +65,10 @@ public class ARSReloaded {
     }
 
     public static void main(String... args) throws InterruptedException, SQLException {
-
         loadARS();
-
     }
 
-    public static void loadDatabases() {
+    public static void loadConfig() {
         Config cf = new ConfigWrapper().getConfig();
         ADMIN_ID = cf.getADMIN_ID();
         TOKEN = cf.getTOKEN();
@@ -96,12 +96,25 @@ public class ARSReloaded {
             if (processingHashMap.containsKey(processing.getVesselID()))
                 continue;
             processingHashMap.put(processing.getVesselID(), processing);
-            System.out.println(processing.getVesselID() + " plugin was added to the server");
+            System.out.println(processing.getVesselID() + " User report plugin was added to the server");
         }
 
         for (Command command : plugins.getExtensions(Command.class)) {
             command.register();
             System.out.println("Register command : " + command.getName() + " from " + command.getClass().getName());
+        }
+
+        try {
+            for (ProcessAllReports reports : plugins.getExtensions(ProcessAllReports.class)) {
+                if (!getWrapper().isCo(reports.getVesselID(), reports.getID()))
+                    continue;
+                if (processings.containsKey(reports.getVesselID()))
+                    continue;
+                processings.put(reports.getVesselID(), reports);
+                System.out.println(reports.getVesselID() + " Post user report processing plugin was added");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
 
 
@@ -110,7 +123,7 @@ public class ARSReloaded {
     public static void loadSpark() throws InterruptedException {
         Thread.sleep(100);
         System.out.println("   ");
-        System.out.println("Welcome in ARS v1.5");
+        System.out.println("Welcome in ARS v1.7");
         Locale.setDefault(Locale.FRANCE);
         System.out.println("Start Time : " + new SimpleDateFormat("dd/MM/YYYY hh:mm:ss").format(new Date(System.currentTimeMillis())));
         System.out.println("   ");
@@ -127,7 +140,7 @@ public class ARSReloaded {
     }
 
     public static void loadARS() throws InterruptedException, SQLException {
-        loadDatabases();
+        loadConfig();
         loadPlugins();
         loadSpark();
 
@@ -251,8 +264,9 @@ public class ARSReloaded {
             sendHelp(recipientID);
             return;
         }
-        String command = text.substring(1).split(" ")[0];
-        String[] args = Arrays.copyOfRange(text.substring(1).split(" "), 1, text.substring(1).split(" ").length);
+        String[] rawCommand = text.substring(1).split(" ");
+        String command = rawCommand[0];
+        String[] args = Arrays.copyOfRange(rawCommand, 1, rawCommand.length);
         if (!Command.commands.containsKey(command) && !Command.alias.containsKey(command)) {
             sendHelp(recipientID);
             return;

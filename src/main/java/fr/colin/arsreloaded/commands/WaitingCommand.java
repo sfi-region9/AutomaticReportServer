@@ -1,7 +1,7 @@
 package fr.colin.arsreloaded.commands;
 
 import fr.colin.arsreloaded.plugins.Command;
-import fr.colin.arsreloaded.objects.VesselNotFoundException;
+import fr.colin.arsreloaded.utils.VesselNotFoundException;
 import org.pf4j.Extension;
 
 import java.sql.SQLException;

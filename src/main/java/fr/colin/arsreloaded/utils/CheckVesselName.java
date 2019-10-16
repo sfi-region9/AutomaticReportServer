@@ -1,20 +1,20 @@
-package fr.colin.arsreloaded.objects;
+package fr.colin.arsreloaded.utils;
 
 import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.utils.DatabaseWrapper;
+import fr.colin.arsreloaded.databases.DatabaseWrapper;
 
 import java.sql.SQLException;
 
-public class CheckVessel {
+public class CheckVesselName {
 
     private String vesselid;
     private String coid;
-    private String template;
+    private String text;
 
-    public CheckVessel(String vesselid, String coid, String template) {
+    public CheckVesselName(String vesselid, String coid, String text) {
         this.vesselid = vesselid;
         this.coid = coid;
-        this.template = template;
+        this.text = text;
     }
 
     public boolean update() {
@@ -26,8 +26,8 @@ public class CheckVessel {
         } catch (SQLException e) {
             return false;
         }
-        template = template.replace("\n", "\\n");
-        w.changeVesselTemplate(vesselid, template);
+        text = text.replace("\n", "\\n");
+        w.changeVesselDefaultReport(vesselid, text);
         return false;
     }
 }

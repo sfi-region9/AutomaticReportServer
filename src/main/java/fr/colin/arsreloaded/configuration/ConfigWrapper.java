@@ -9,8 +9,7 @@ import java.io.InputStreamReader;
 
 public class ConfigWrapper {
 
-    String rawConfig;
-
+    private String rawConfig;
 
 
     public ConfigWrapper() {
@@ -20,10 +19,9 @@ public class ConfigWrapper {
         rawConfig = StringUtils.join(br.lines().toArray());
     }
 
-    public Config getConfig(){
+    public Config getConfig() {
         return new Gson().fromJson(rawConfig, Config.class);
     }
-
 
 
 }

@@ -11,7 +11,7 @@ import java.util.HashMap;
 public abstract class Command implements ExtensionPoint {
 
     private String name;
-    private String aliases[];
+    private String[] aliasies;
     protected boolean hidden = false;
 
 
@@ -20,12 +20,12 @@ public abstract class Command implements ExtensionPoint {
 
     public Command(String name, String... alias) {
         this.name = name;
-        this.aliases = alias;
+        this.aliasies = alias;
     }
 
     public void register() {
         commands.put(name, this);
-        for (String s : aliases) {
+        for (String s : aliasies) {
             Command.alias.put(s, this);
         }
     }
