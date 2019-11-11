@@ -1,4 +1,4 @@
-package fr.colin.arsreloaded.databases;
+package fr.charlotte.arsreloaded.databases;
 
 
 import java.sql.*;

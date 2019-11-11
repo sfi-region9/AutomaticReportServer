@@ -1,11 +1,11 @@
-package fr.colin.arsreloaded.commands;
+package fr.charlotte.arsreloaded.commands;
 
-import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.plugins.Command;
-import fr.colin.arsreloaded.databases.DatabaseUserWrapper;
+import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.plugins.Command;
+import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
 import org.pf4j.Extension;
 
-import static fr.colin.arsreloaded.ARSReloaded.*;
+import static fr.charlotte.arsreloaded.ARSReloaded.*;
 
 @Extension
 public class LinkCommand extends Command {

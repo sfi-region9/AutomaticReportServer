@@ -1,18 +1,18 @@
-package fr.colin.arsreloaded.databases;
+package fr.charlotte.arsreloaded.databases;
 
-import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.plugins.ProcessAllReports;
-import fr.colin.arsreloaded.utils.Users;
-import fr.colin.arsreloaded.utils.Vessel;
-import fr.colin.arsreloaded.utils.VesselNotFoundException;
-import fr.colin.arsreloaded.plugins.ReportProcessing;
+import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
+import fr.charlotte.arsreloaded.utils.Users;
+import fr.charlotte.arsreloaded.utils.Vessel;
+import fr.charlotte.arsreloaded.utils.VesselNotFoundException;
+import fr.charlotte.arsreloaded.plugins.ReportProcessing;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Class to wrap the database into easy-to-use methods
@@ -25,12 +25,6 @@ public class DatabaseWrapper {
     public DatabaseWrapper() {
 
     }
-
-    public static void checkDatabase(Database database) throws SQLException {
-        if (!database.getConnection().isValid(31536000)) {
-        }
-    }
-
 
     /**
      * Method to get all pending vessels in order to accept/deny them
@@ -76,11 +70,11 @@ public class DatabaseWrapper {
      * @param scc      The SCC of the CO
      * @return if the register is successful
      */
-    public boolean addWaiting(String senderID, String vessel, String scc) throws SQLException {
+    public boolean addWaiting(String senderID, String vessel, String scc, int region) throws SQLException {
         if (coExist(senderID)) {
             return false;
         }
-        db.update(String.format("INSERT INTO `waiting`(coid,vesselid,coscc, vesselname) VALUES('%s','%s','%s', '%s')", senderID, vesselNameToID(vessel), scc, vessel));
+        db.update(String.format("INSERT INTO `waiting`(coid,vesselid,coscc, vesselname, date, region) VALUES('%s','%s','%s', '%s', '%s', %s)", senderID, vesselNameToID(vessel), scc, vessel, System.currentTimeMillis(), region));
         return true;
     }
 
@@ -112,8 +106,18 @@ public class DatabaseWrapper {
         String vesselid = rs.getString("vesselid");
         String coscc = rs.getString("coscc");
         String vesselName = rs.getString("vesselname");
+        String date = rs.getString("date");
+        int region = rs.getInt("region");
+
+        if (ARSReloaded.vesselByIdCache == null)
+            getVesselByRegions();
+        int i = ARSReloaded.vesselByIdCache.get(region);
+        i++;
+        ARSReloaded.vesselByIdCache.remove(region);
+        ARSReloaded.vesselByIdCache.put(region, i);
+
         db.update("DELETE FROM `waiting` WHERE vesselid = '" + vesselID + "'");
-        db.update(String.format("INSERT INTO `vessels`(name,vesselid,coid,template,default_text) VALUES('%s','%s','%s','%s','%s')", vesselName, vesselid, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "Nothing to report"));
+        db.update(String.format("INSERT INTO `vessels`(name,vesselid,coid,template,default_text,date,region) VALUES('%s','%s','%s','%s','%s', '%s', %s)", vesselName, vesselid, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report", date, region));
         return true;
     }
 
@@ -180,6 +184,15 @@ public class DatabaseWrapper {
         return v;
     }
 
+    public Vessel getVesselById(String vesselid) throws SQLException {
+        ResultSet rs = db.getResult("SELECT * FROM vessels WHERE vesselid='" + vesselid + "'");
+        Vessel v = null;
+        while (rs.next()) {
+            v = new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
+        }
+        return v;
+    }
+
     /**
      * A method to convert a vesselname in a one-word ID
      *
@@ -224,7 +237,7 @@ public class DatabaseWrapper {
         if (user.getUuid().equalsIgnoreCase("defaultuuid"))
             return;
 
-        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.getDefaul(), user.getUuid()));
+        db.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselid(), v.constructNewReport(), user.getUuid()));
     }
 
     public boolean switchVessel(Users u, String vesselid) {
@@ -311,11 +324,60 @@ public class DatabaseWrapper {
         ResultSet rs = db.getResult("SELECT * FROM users WHERE scc='" + users.getScc() + "'");
         try {
             rs.next();
-            return new Users(rs.getString("name"), rs.getString("scc"), rs.getString("vesselid"), rs.getString("report"), rs.getString("uuid"));
+            String r = rs.getString("report");
+            Vessel v = getVesselById(users.getVesselid());
+            if (r.equalsIgnoreCase(v.constructNewReport())) {
+                r = v.constructFullReport();
+            }
+            return new Users(rs.getString("name"), rs.getString("scc"), rs.getString("vesselid"), r, rs.getString("uuid"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return new Users("invalidID", "", "", "");
+    }
+
+    public HashMap<Integer, Integer> getVesselByRegions() {
+        HashMap<Integer, Integer> sd = new HashMap<>();
+        for (int i = 0; i < 21; i++) {
+            int s = 0;
+            ResultSet rs = db.getResult("SELECT * FROM vessels WHERE region=" + i);
+            while (true) {
+                try {
+                    if (!rs.next()) break;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                s++;
+            }
+            sd.put(i, s);
+        }
+
+        if (ARSReloaded.vesselByIdCache == null)
+            ARSReloaded.vesselByIdCache = sd;
+        return sd;
+    }
+
+    static SimpleDateFormat d = new SimpleDateFormat("YYYY-MM-dd", Locale.UK);
+
+
+    public void keepTrackReports(int i) {
+        d.setNumberFormat(NumberFormat.getNumberInstance(Locale.US));
+        d.setTimeZone(TimeZone.getTimeZone("GMT"));
+        db.update("INSERT INTO reports(date,numbers) VALUES('" + d.format(new Date(System.currentTimeMillis())).toUpperCase() + "', " + i + ")");
+    }
+
+    public TreeMap<String, Integer> getTrackedReports() {
+        ResultSet rs = db.getResult("SELECT * FROM reports ORDER BY reports . `date` ASC");
+        TreeMap<String, Integer> p = new TreeMap<>();
+        while (true) {
+            try {
+                if (!rs.next()) break;
+                p.put(rs.getString("date"), rs.getInt("numbers"));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return p;
     }
 
     /**
@@ -328,7 +390,7 @@ public class DatabaseWrapper {
         ResultSet rs = db.getResult("SELECT * FROM `vessels`");
         ArrayList<Vessel> vessels = new ArrayList<>();
         HashMap<Vessel, ArrayList<Users>> users = new HashMap<>();
-
+        int reports = 0;
         while (rs.next()) {
             vessels.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text")));
         }
@@ -353,16 +415,17 @@ public class DatabaseWrapper {
                 System.out.println(u.getVesselid() + " " + u.getScc() + " " + v.getCoid() + " " + (ARSReloaded.messenger == null));
                 message.add(u.constructReport(v));
                 message.add("--------------------------------------------------------------------");
-                db.update("UPDATE `users` SET report='" + v.getDefaul() + "' WHERE scc='" + u.getScc() + "'");
+                db.update("UPDATE `users` SET report='" + v.constructNewReport() + "' WHERE scc='" + u.getScc() + "'");
                 ReportProcessing rp = ARSReloaded.processingHashMap.get(v.getVesselid());
 
                 if (rp != null)
                     rp.process(u, v);
                 s[index] = u;
                 index++;
+                reports++;
             }
             ProcessAllReports par = ARSReloaded.processings.get(v.getVesselid());
-            if(par != null)
+            if (par != null)
                 par.process(s, v);
 
             message.add(" ");
@@ -370,6 +433,7 @@ public class DatabaseWrapper {
             ARSReloaded.sendMessage(v.getCoid(), StringUtils.join(message, "\n"));
         }
         setLast();
+        keepTrackReports(reports);
         return "Report";
     }
 

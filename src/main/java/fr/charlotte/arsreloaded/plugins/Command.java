@@ -1,4 +1,4 @@
-package fr.colin.arsreloaded.plugins;
+package fr.charlotte.arsreloaded.plugins;
 
 import org.pf4j.ExtensionPoint;
 

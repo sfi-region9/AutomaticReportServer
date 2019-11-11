@@ -1,6 +1,6 @@
-package fr.colin.arsreloaded.databases;
+package fr.charlotte.arsreloaded.databases;
 
-import fr.colin.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.ARSReloaded;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

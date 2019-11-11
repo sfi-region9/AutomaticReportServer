@@ -1,11 +1,11 @@
-package fr.colin.arsreloaded.commands;
+package fr.charlotte.arsreloaded.commands;
 
-import fr.colin.arsreloaded.plugins.Command;
+import fr.charlotte.arsreloaded.plugins.Command;
 import org.pf4j.Extension;
 
 import java.util.ArrayList;
 
-import static fr.colin.arsreloaded.ARSReloaded.*;
+import static fr.charlotte.arsreloaded.ARSReloaded.*;
 
 @Extension
 public class AboutCommand extends Command {

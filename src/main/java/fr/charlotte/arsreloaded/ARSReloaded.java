@@ -1,4 +1,4 @@
-package fr.colin.arsreloaded;
+package fr.charlotte.arsreloaded;
 
 import com.github.messenger4j.Messenger;
 import com.github.messenger4j.exception.MessengerApiException;
@@ -7,18 +7,18 @@ import com.github.messenger4j.send.MessagePayload;
 import com.github.messenger4j.send.MessagingType;
 import com.github.messenger4j.send.message.TextMessage;
 import com.google.gson.Gson;
-import fr.colin.arsreloaded.configuration.Config;
-import fr.colin.arsreloaded.configuration.ConfigWrapper;
-import fr.colin.arsreloaded.plugins.ProcessAllReports;
-import fr.colin.arsreloaded.utils.CheckCo;
-import fr.colin.arsreloaded.utils.CheckVessel;
-import fr.colin.arsreloaded.utils.CheckVesselName;
-import fr.colin.arsreloaded.utils.Users;
-import fr.colin.arsreloaded.plugins.Command;
-import fr.colin.arsreloaded.plugins.ReportProcessing;
-import fr.colin.arsreloaded.databases.Database;
-import fr.colin.arsreloaded.databases.DatabaseUserWrapper;
-import fr.colin.arsreloaded.databases.DatabaseWrapper;
+import fr.charlotte.arsreloaded.configuration.Config;
+import fr.charlotte.arsreloaded.configuration.ConfigWrapper;
+import fr.charlotte.arsreloaded.databases.Database;
+import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
+import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
+import fr.charlotte.arsreloaded.plugins.Command;
+import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
+import fr.charlotte.arsreloaded.plugins.ReportProcessing;
+import fr.charlotte.arsreloaded.utils.CheckVessel;
+import fr.charlotte.arsreloaded.utils.CheckVesselName;
+import fr.charlotte.arsreloaded.utils.CheckCo;
+import fr.charlotte.arsreloaded.utils.Users;
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -41,6 +41,7 @@ public class ARSReloaded {
     private static Database userDatabase;
     private static DatabaseUserWrapper wrapperD;
     private static DatabaseWrapper wrapper;
+    public static HashMap<Integer, Integer> vesselByIdCache = null;
 
     public static String ADMIN_ID = "";
     private static String TOKEN = "";
@@ -49,7 +50,7 @@ public class ARSReloaded {
 
     public static HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
     public static HashMap<String, ProcessAllReports> processings = new HashMap<>();
-
+    public static TreeMap<String, Integer> trackedReports = new TreeMap<>();
     public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
     public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
     public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
@@ -66,6 +67,7 @@ public class ARSReloaded {
 
     public static void main(String... args) throws InterruptedException, SQLException {
         loadARS();
+        trackedReports = getWrapper().getTrackedReports();
     }
 
     public static void loadConfig() {
@@ -113,7 +115,7 @@ public class ARSReloaded {
                 processings.put(reports.getVesselID(), reports);
                 System.out.println(reports.getVesselID() + " Post user report processing plugin was added");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -161,6 +163,15 @@ public class ARSReloaded {
                 return request.queryParams("hub.challenge");
             return "Invalid";
         });
+
+        get("/vessel_by_regions", (request, response) -> {
+            if (vesselByIdCache == null)
+                return new Gson().toJson(getWrapper().getVesselByRegions());
+            return new Gson().toJson(vesselByIdCache);
+        });
+
+        get("/reports_by_date", (request, response) -> new Gson().toJson(trackedReports));
+
         post("/", (request, response) -> {
             String payload = request.body();
             messenger.onReceiveEvents(payload, java.util.Optional.ofNullable(request.headers(Messenger.SIGNATURE_HEADER_NAME)), event -> {

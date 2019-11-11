@@ -1,7 +1,7 @@
-package fr.colin.arsreloaded.commands;
+package fr.charlotte.arsreloaded.commands;
 
-import fr.colin.arsreloaded.ARSReloaded;
-import fr.colin.arsreloaded.plugins.Command;
+import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.plugins.Command;
 import org.pf4j.Extension;
 
 @Extension

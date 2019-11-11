@@ -1,13 +1,13 @@
-package fr.colin.arsreloaded.commands;
+package fr.charlotte.arsreloaded.commands;
 
-import fr.colin.arsreloaded.plugins.Command;
+import fr.charlotte.arsreloaded.plugins.Command;
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.Extension;
 
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import static fr.colin.arsreloaded.ARSReloaded.*;
+import static fr.charlotte.arsreloaded.ARSReloaded.*;
 
 @Extension
 public class SubscribeCommand extends Command {
@@ -23,16 +23,30 @@ public class SubscribeCommand extends Command {
         }
         String scc;
         String name;
-        if (args.length == 2) {
+        String region;
+        if (args.length == 3) {
             scc = args[0];
-            name = args[1];
+            name = args[2];
+            region = args[1];
         } else {
             scc = args[0];
-            String[] names = Arrays.copyOfRange(args, 1, args.length);
+            region = args[1];
+            String[] names = Arrays.copyOfRange(args, 2, args.length);
             name = StringUtils.join(names, "_");
         }
+        int re;
         try {
-            boolean result = getWrapper().addWaiting(senderID, name, scc);
+            re = Integer.parseInt(region);
+        } catch (NumberFormatException e) {
+            sendMessage(senderID, "Error, please enter a number for the region");
+            return;
+        }
+        if (re > 99 || re < 0) {
+            sendMessage(senderID, "Error, the region must be between 0 and 99");
+            return;
+        }
+        try {
+            boolean result = getWrapper().addWaiting(senderID, name, scc, re);
             if (result) {
                 sendMessage(senderID, "Your vessel is successfully registered in the database !");
                 sendMessage(ADMIN_ID, "You have a new pending registry from " + scc + " for the vessel " + name);
@@ -52,6 +66,6 @@ public class SubscribeCommand extends Command {
 
     @Override
     public String args() {
-        return " [scc] [vesselname]";
+        return " [scc] [region] [vesselname]";
     }
 }

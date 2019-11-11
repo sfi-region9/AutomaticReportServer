@@ -1,4 +1,4 @@
-package fr.colin.arsreloaded.configuration;
+package fr.charlotte.arsreloaded.configuration;
 
 import org.apache.commons.lang3.StringUtils;
 
