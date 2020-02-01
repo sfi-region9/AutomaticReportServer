@@ -11,23 +11,23 @@ public class Users {
 
     private String name;
     private String scc;
-    private String vesselid;
+    private String vesselID;
     private String report = "";
     private String uuid = "defaultuuid";
 
 
-    public Users(String name, String scc, String vesselid, String report, String uuid) {
+    public Users(String name, String scc, String vesselID, String report, String uuid) {
         this.name = name;
         this.scc = scc;
-        this.vesselid = vesselid;
+        this.vesselID = vesselID;
         this.report = report;
         this.uuid = uuid;
     }
 
-    public Users(String name, String scc, String vesselid, String report) {
+    public Users(String name, String scc, String vesselID, String report) {
         this.name = name;
         this.scc = scc;
-        this.vesselid = vesselid;
+        this.vesselID = vesselID;
         this.report = report;
     }
 
@@ -39,8 +39,8 @@ public class Users {
         return name;
     }
 
-    public String getVesselid() {
-        return vesselid;
+    public String getVesselID() {
+        return vesselID;
     }
 
     public String getScc() {

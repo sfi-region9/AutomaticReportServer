@@ -39,8 +39,6 @@ public class WaitingCommand extends Command {
     }
 
     private void deny(String senderID, String[] args) {
-        if (args.length < 2)
-            return;
         String vesselID = args[1];
         String coID;
         try {
@@ -62,9 +60,6 @@ public class WaitingCommand extends Command {
     }
 
     private void accept(String senderID, String[] args) {
-        if (args.length < 2)
-            return;
-        //CONSTRUCTION !wait accept <vesselid>
         String vesselID = args[1];
         String coID;
         try {
@@ -86,18 +81,18 @@ public class WaitingCommand extends Command {
     }
 
     private void showList(String senderID) {
-        ArrayList<String> m = new ArrayList<>();
+        ArrayList<String> message = new ArrayList<>();
         try {
-            ArrayList<String> pW = getWrapper().getPendingWaiting();
-            m.addAll(pW);
+            ArrayList<String> pendingWaiting = getWrapper().getPendingWaiting();
+            message.addAll(pendingWaiting);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (m.isEmpty()) {
-            sendMessage(senderID, "Empty ! Good job sir !");
+        if (message.isEmpty()) {
+            sendMessage(senderID, "Empty ! Good job !");
             return;
         }
-        sendMultiMessage(senderID, "Pending List", m);
+        sendMultiMessage(senderID, "Pending List", message);
     }
 
     @Override

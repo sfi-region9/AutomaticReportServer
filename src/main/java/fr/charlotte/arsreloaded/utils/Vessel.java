@@ -4,21 +4,21 @@ package fr.charlotte.arsreloaded.utils;
 public class Vessel {
 
     private String name;
-    private String vesselid;
-    private String coid;
+    private String vesselID;
+    private String coID;
     private String template;
-    private String defaul;
+    private String defaultReport;
 
-    public Vessel(String name, String vesselid, String coid, String template, String defaul) {
+    public Vessel(String name, String vesselID, String coID, String template, String defaultReport) {
         this.name = name;
-        this.vesselid = vesselid;
-        this.coid = coid;
+        this.vesselID = vesselID;
+        this.coID = coID;
         this.template = template;
-        this.defaul = defaul;
+        this.defaultReport = defaultReport;
     }
 
-    public String getDefaul() {
-        return defaul;
+    public String getDefaultReport() {
+        return defaultReport;
     }
 
     public String getTemplate() {
@@ -30,12 +30,12 @@ public class Vessel {
         return name;
     }
 
-    public String getCoid() {
-        return coid;
+    public String getCoID() {
+        return coID;
     }
 
     public String constructNewReport() {
-        String[] d = defaul.split("\n");
+        String[] d = defaultReport.split("\n");
         StringBuilder newDe = new StringBuilder();
         for (String sd : d) {
             if (sd.startsWith("#")) {
@@ -46,19 +46,17 @@ public class Vessel {
     }
 
     public String constructFullReport() {
-        String[] d = defaul.split("\n");
+        String[] d = defaultReport.split("\n");
         StringBuilder newDe = new StringBuilder();
         for (String sd : d) {
-            if (sd.startsWith("#")) {
-                //DONOTHING
-            } else {
+            if (!sd.startsWith("#")) {
                 newDe.append(sd).append("\n");
             }
         }
         return newDe.toString();
     }
 
-    public String getVesselid() {
-        return vesselid;
+    public String getVesselID() {
+        return vesselID;
     }
 }

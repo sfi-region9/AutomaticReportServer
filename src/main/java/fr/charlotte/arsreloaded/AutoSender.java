@@ -13,17 +13,13 @@ import static java.lang.Thread.sleep;
 
 public class AutoSender implements Runnable {
 
-    public DatabaseWrapper db = new DatabaseWrapper();
+    private DatabaseWrapper databaseWrapper = new DatabaseWrapper(ARSReloaded.getArsDatabase());
 
-    public DatabaseWrapper getWrapper() {
-        return db;
-    }
-
-    public boolean isTimeToSent() {
+    private boolean isTimeToSent() {
 
         Calendar cal = Calendar.getInstance();
         int day = cal.get(Calendar.DAY_OF_MONTH);
-        long last = getWrapper().getLast();
+        long last = databaseWrapper.getLast();
         int month = cal.get(Calendar.MONTH);
 
         int detectDay = 0;
@@ -48,13 +44,13 @@ public class AutoSender implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-          //  ARSReloaded.sendMessage(ARSReloaded.ADMIN_ID, "I'm still here");
+            ARSReloaded.sendMessage(ARSReloaded.ADMIN_ID, "I'm still here");
             System.out.println("Launching Automatic Launching Verification");
             if (isTimeToSent()) {
                 System.out.println("Time is now :D !");
                 try {
-                    getWrapper().sendReports();
-                    getWrapper().setLast();
+                    databaseWrapper.sendReports();
+                    databaseWrapper.setLast();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
