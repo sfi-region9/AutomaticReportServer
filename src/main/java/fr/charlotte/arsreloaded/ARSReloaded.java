@@ -35,6 +35,7 @@ public class ARSReloaded {
 
     private static Messenger messenger = null;
     private static Database userDatabase;
+    private static Database arsDatabase;
     private static DatabaseUserWrapper wrapperD;
     private static DatabaseWrapper wrapper;
 
@@ -53,7 +54,8 @@ public class ARSReloaded {
     public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
     public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
     public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
-    
+
+
     private final static Gson GSON = new Gson();
 
     public static PluginManager plugins;
@@ -73,7 +75,7 @@ public class ARSReloaded {
         TOKEN = config.getTOKEN();
         ACCESS_TOKEN = config.getACCESS_TOKEN();
         SECRET = config.getSECRET();
-        Database arsDatabase = new Database(config.getDB_HOST(), config.getDB_NAME(), config.getDB_USER(), config.getDB_PASSWORD());
+        arsDatabase = new Database(config.getDB_HOST(), config.getDB_NAME(), config.getDB_USER(), config.getDB_PASSWORD());
         userDatabase = new Database(config.getDB_HOST(), config.getDB_USER_NAME(), config.getDB_USER(), config.getDB_PASSWORD());
         wrapper = new DatabaseWrapper(arsDatabase);
         wrapperD = new DatabaseUserWrapper(arsDatabase);
@@ -255,7 +257,7 @@ public class ARSReloaded {
         });
 
         get("/allvessels", (request, response) -> {
-            if(vesselsCache != null)
+            if (vesselsCache != null)
                 return vesselsCache;
             return GSON.toJson(getWrapper().getAllVessels());
         });
@@ -351,6 +353,10 @@ public class ARSReloaded {
 
     public static Database getUserDatabase() {
         return userDatabase;
+    }
+
+    public static Database getArsDatabase() {
+        return arsDatabase;
     }
 
     public static DatabaseUserWrapper getWrapperD() {
