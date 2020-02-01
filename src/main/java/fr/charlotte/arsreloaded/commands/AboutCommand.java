@@ -17,14 +17,14 @@ public class AboutCommand extends Command {
 
     @Override
     public void onCommand(String senderID, String text, String[] args) {
-        ArrayList<String> all = new ArrayList<>();
-        all.add(" ");
-        all.add("Automatize all your report in your chapter !");
-        all.add("Send a message to Colin THOMAS, a mail to contact@nwa2coco.fr for any infos !");
-        all.add("Developed with ❤️ by Colin THOMAS");
-        all.add("Maintained and Hosted by USS Versailles, R9");
-        all.add(" ");
-        sendMultiMessage(senderID, "Automatic Report Server", all);
+        ArrayList<String> message = new ArrayList<>();
+        message.add(" ");
+        message.add("Automatize all your report in your chapter !");
+        message.add("Send a message to Charlotte THOMAS, a mail to contact@nwa2coco.fr for any infos !");
+        message.add("Developed with ❤️ by Charlotte THOMAS");
+        message.add("Maintained and Hosted by USS Versailles, R9");
+        message.add(" ");
+        sendMultiMessage(senderID, "Automatic Report Server", message);
     }
 
     @Override

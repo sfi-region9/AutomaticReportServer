@@ -54,7 +54,7 @@ public class SubscribeCommand extends Command {
                 sendMessage(senderID, "Your vessel already exist in the database !");
             }
         } catch (SQLException e) {
-            sendMessage(senderID, "An error occured please try again or contact the administrator");
+            sendMessage(senderID, "An error occurred please try again or contact the administrator");
         }
 
     }

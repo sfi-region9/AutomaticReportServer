@@ -15,10 +15,7 @@ import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
 import fr.charlotte.arsreloaded.plugins.ReportProcessing;
-import fr.charlotte.arsreloaded.utils.CheckVessel;
-import fr.charlotte.arsreloaded.utils.CheckVesselName;
-import fr.charlotte.arsreloaded.utils.CheckCo;
-import fr.charlotte.arsreloaded.utils.Users;
+import fr.charlotte.arsreloaded.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -36,30 +33,30 @@ import static spark.Spark.*;
 public class ARSReloaded {
 
 
-    public static Messenger messenger = null;
-    private static Database db;
+    private static Messenger messenger = null;
     private static Database userDatabase;
     private static DatabaseUserWrapper wrapperD;
     private static DatabaseWrapper wrapper;
+
     public static HashMap<Integer, Integer> vesselByIdCache = null;
+    public static ArrayList<Vessel> vesselsCache = null;
 
     public static String ADMIN_ID = "";
     private static String TOKEN = "";
-    private static String ACCES_TOKEN = "";
+    private static String ACCESS_TOKEN = "";
     private static String SECRET = "";
 
     public static HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
-    public static HashMap<String, ProcessAllReports> processings = new HashMap<>();
-    public static TreeMap<String, Integer> trackedReports = new TreeMap<>();
+    public static HashMap<String, ProcessAllReports> processing = new HashMap<>();
+    private static TreeMap<String, Integer> trackedReports = new TreeMap<>();
+
     public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
     public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
     public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
+    
+    private final static Gson GSON = new Gson();
 
     public static PluginManager plugins;
-
-    public static Database getDb() {
-        return db;
-    }
 
     public static DatabaseWrapper getWrapper() {
         return wrapper;
@@ -70,25 +67,25 @@ public class ARSReloaded {
         trackedReports = getWrapper().getTrackedReports();
     }
 
-    public static void loadConfig() {
-        Config cf = new ConfigWrapper().getConfig();
-        ADMIN_ID = cf.getADMIN_ID();
-        TOKEN = cf.getTOKEN();
-        ACCES_TOKEN = cf.getACCESS_TOKEN();
-        SECRET = cf.getSECRET();
-        db = new Database(cf.getDB_HOST(), cf.getDB_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
-        userDatabase = new Database(cf.getDB_HOST(), cf.getDB_USER_NAME(), cf.getDB_USER(), cf.getDB_PASSWORD());
-        wrapper = new DatabaseWrapper();
-        wrapperD = new DatabaseUserWrapper();
+    private static void loadConfig() {
+        Config config = new ConfigWrapper().getConfig();
+        ADMIN_ID = config.getADMIN_ID();
+        TOKEN = config.getTOKEN();
+        ACCESS_TOKEN = config.getACCESS_TOKEN();
+        SECRET = config.getSECRET();
+        Database arsDatabase = new Database(config.getDB_HOST(), config.getDB_NAME(), config.getDB_USER(), config.getDB_PASSWORD());
+        userDatabase = new Database(config.getDB_HOST(), config.getDB_USER_NAME(), config.getDB_USER(), config.getDB_PASSWORD());
+        wrapper = new DatabaseWrapper(arsDatabase);
+        wrapperD = new DatabaseUserWrapper(arsDatabase);
     }
 
-    public static void loadPlugins() throws SQLException {
+    private static void loadPlugins() throws SQLException {
         processingHashMap.clear();
-        File f = new File("plugins/");
-        if (!f.exists())
-            f.mkdir();
-        System.out.println(f.getAbsolutePath());
-        plugins = new JarPluginManager(f.toPath());
+        File file = new File("plugins/");
+        if (!file.exists())
+            file.mkdir();
+        System.out.println(file.getAbsolutePath());
+        plugins = new JarPluginManager(file.toPath());
         plugins.loadPlugins();
         plugins.startPlugins();
 
@@ -101,20 +98,22 @@ public class ARSReloaded {
             System.out.println(processing.getVesselID() + " User report plugin was added to the server");
         }
 
-        for (Command command : plugins.getExtensions(Command.class)) {
+        plugins.getExtensions(Command.class).forEach(command -> {
             command.register();
             System.out.println("Register command : " + command.getName() + " from " + command.getClass().getName());
-        }
+        });
+
 
         try {
             for (ProcessAllReports reports : plugins.getExtensions(ProcessAllReports.class)) {
                 if (!getWrapper().isCo(reports.getVesselID(), reports.getID()))
                     continue;
-                if (processings.containsKey(reports.getVesselID()))
+                if (processing.containsKey(reports.getVesselID()))
                     continue;
-                processings.put(reports.getVesselID(), reports);
+                processing.put(reports.getVesselID(), reports);
                 System.out.println(reports.getVesselID() + " Post user report processing plugin was added");
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,7 +121,7 @@ public class ARSReloaded {
 
     }
 
-    public static void loadSpark() throws InterruptedException {
+    private static void loadSpark() throws InterruptedException {
         Thread.sleep(100);
         System.out.println("   ");
         System.out.println("Welcome in ARS v1.7");
@@ -132,7 +131,7 @@ public class ARSReloaded {
         Thread.sleep(100);
         //Build messenger
         try {
-            messenger = Messenger.create(ACCES_TOKEN, SECRET, TOKEN);
+            messenger = Messenger.create(ACCESS_TOKEN, SECRET, TOKEN);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -141,7 +140,7 @@ public class ARSReloaded {
         setupRoutes();
     }
 
-    public static void loadARS() throws InterruptedException, SQLException {
+    private static void loadARS() throws InterruptedException, SQLException {
         loadConfig();
         loadPlugins();
         loadSpark();
@@ -166,11 +165,11 @@ public class ARSReloaded {
 
         get("/vessel_by_regions", (request, response) -> {
             if (vesselByIdCache == null)
-                return new Gson().toJson(getWrapper().getVesselByRegions());
-            return new Gson().toJson(vesselByIdCache);
+                return GSON.toJson(getWrapper().getVesselByRegions());
+            return GSON.toJson(vesselByIdCache);
         });
 
-        get("/reports_by_date", (request, response) -> new Gson().toJson(trackedReports));
+        get("/reports_by_date", (request, response) -> GSON.toJson(trackedReports));
 
         post("/", (request, response) -> {
             String payload = request.body();
@@ -184,20 +183,20 @@ public class ARSReloaded {
         });
         post("/register_user", (request, response) -> {
             String json = request.body();
-            Users users = new Gson().fromJson(json, Users.class);
+            Users users = GSON.fromJson(json, Users.class);
             getWrapper().register(users);
             return "User successfully uploaded";
         });
 
         post("/destroy_user", (request, response) -> {
             String json = request.body();
-            Users users = new Gson().fromJson(json, Users.class);
+            Users users = GSON.fromJson(json, Users.class);
             return getWrapper().destroyUser(users);
         });
 
         post("/submit", (request, response) -> {
             String json = request.body();
-            Users users = new Gson().fromJson(json, Users.class);
+            Users users = GSON.fromJson(json, Users.class);
             return getWrapper().saveReport(users);
         });
 
@@ -213,49 +212,53 @@ public class ARSReloaded {
 
         post("/check_co", (request, response) -> {
             String json = request.body();
-            CheckCo co = new Gson().fromJson(json, CheckCo.class);
+            CheckCo co = GSON.fromJson(json, CheckCo.class);
             return co.process();
         });
 
         post("/update_template", (request, response) -> {
             String json = request.body();
-            CheckVessel v = new Gson().fromJson(json, CheckVessel.class);
+            CheckVessel v = GSON.fromJson(json, CheckVessel.class);
             return v.update();
         });
 
         post("/switch_vessel", (request, response) -> {
             String json = request.body();
-            Users users = new Gson().fromJson(json, Users.class);
-            return getWrapper().switchVessel(users, users.getVesselid());
+            Users users = GSON.fromJson(json, Users.class);
+            return getWrapper().switchVessel(users, users.getVesselID());
         });
 
         get("/send", (request, response) -> {
             if (request.queryParams().isEmpty())
                 return false;
             if (request.queryParams("password").contains("accessgranted"))
-                new DatabaseWrapper().sendReports();
+                getWrapper().sendReports();
             return "congratulations";
         });
 
         post("/update_name", (request, response) -> {
             String json = request.body();
-            CheckVesselName ns = new Gson().fromJson(json, CheckVesselName.class);
+            CheckVesselName ns = GSON.fromJson(json, CheckVesselName.class);
             return ns.update();
         });
 
         post("/syncronize", (request, response) -> {
             String json = request.body();
-            Users users = new Gson().fromJson(json, Users.class);
+            Users users = GSON.fromJson(json, Users.class);
             return getWrapper().getReport(users);
         });
 
         post("/syncronize_user", (request, response) -> {
             String json = request.body();
-            Users s = new Gson().fromJson(json, Users.class);
-            return new Gson().toJson(getWrapper().syncronizeUser(s));
+            Users s = GSON.fromJson(json, Users.class);
+            return GSON.toJson(getWrapper().synchronizeUser(s));
         });
 
-        get("/allvessels", (request, response) -> new Gson().toJson(getWrapper().allVessels()));
+        get("/allvessels", (request, response) -> {
+            if(vesselsCache != null)
+                return vesselsCache;
+            return GSON.toJson(getWrapper().getAllVessels());
+        });
 
 
         get("/send", (request, response) -> getWrapper().sendReports());

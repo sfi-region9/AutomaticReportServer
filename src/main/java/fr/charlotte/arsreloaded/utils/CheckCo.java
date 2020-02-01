@@ -6,17 +6,17 @@ import java.sql.SQLException;
 
 public class CheckCo {
 
-    private String vesselid;
-    private String coid;
+    private String vesselID;
+    private String coID;
 
-    public CheckCo(String vesselid, String coid) {
-        this.vesselid = vesselid;
-        this.coid = coid;
+    public CheckCo(String vesselID, String coID) {
+        this.vesselID = vesselID;
+        this.coID = coID;
     }
 
     public boolean process() {
         try {
-            return ARSReloaded.getWrapper().isCo(vesselid, coid);
+            return ARSReloaded.getWrapper().isCo(vesselID, coID);
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -7,27 +7,27 @@ import java.sql.SQLException;
 
 public class CheckVessel {
 
-    private String vesselid;
-    private String coid;
+    private String vesselID;
+    private String coID;
     private String template;
 
-    public CheckVessel(String vesselid, String coid, String template) {
-        this.vesselid = vesselid;
-        this.coid = coid;
+    public CheckVessel(String vesselID, String coID, String template) {
+        this.vesselID = vesselID;
+        this.coID = coID;
         this.template = template;
     }
 
     public boolean update() {
-        DatabaseWrapper w = ARSReloaded.getWrapper();
+        DatabaseWrapper databaseWrapper = ARSReloaded.getWrapper();
         try {
-            if (!w.isCo(vesselid, coid)) {
+            if (!databaseWrapper.isCo(vesselID, coID)) {
                 return false;
             }
         } catch (SQLException e) {
             return false;
         }
         template = template.replace("\n", "\\n");
-        w.changeVesselTemplate(vesselid, template);
+        databaseWrapper.changeVesselTemplate(vesselID, template);
         return false;
     }
 }
