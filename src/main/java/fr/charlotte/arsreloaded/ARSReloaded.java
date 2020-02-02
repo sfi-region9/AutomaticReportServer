@@ -7,8 +7,8 @@ import com.github.messenger4j.send.MessagePayload;
 import com.github.messenger4j.send.MessagingType;
 import com.github.messenger4j.send.message.TextMessage;
 import com.google.gson.Gson;
+
 import fr.charlotte.arsreloaded.configuration.Config;
-import fr.charlotte.arsreloaded.configuration.ConfigWrapper;
 import fr.charlotte.arsreloaded.databases.Database;
 import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
 import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
@@ -70,15 +70,25 @@ public class ARSReloaded {
     }
 
     private static void loadConfig() {
-        Config config = new ConfigWrapper().getConfig();
-        ADMIN_ID = config.getADMIN_ID();
-        TOKEN = config.getTOKEN();
-        ACCESS_TOKEN = config.getACCESS_TOKEN();
-        SECRET = config.getSECRET();
-        arsDatabase = new Database(config.getDB_HOST(), config.getDB_NAME(), config.getDB_USER(), config.getDB_PASSWORD());
-        userDatabase = new Database(config.getDB_HOST(), config.getDB_USER_NAME(), config.getDB_USER(), config.getDB_PASSWORD());
+        Config config = null;
+        try {
+            config = Config.loadConfiguration();
+        } catch (IllegalAccessException e) {
+            System.exit(0);
+        }
+        if (config == null)
+            System.exit(0);
+
+        ACCESS_TOKEN = config.getAccessToken();
+        SECRET = config.getSecretKey();
+        ADMIN_ID = config.getAdminID();
+        TOKEN = config.getVerifyToken();
+
+        arsDatabase = config.setupMainDatabase();
+        userDatabase = config.setupUserDatabase();
+
         wrapper = new DatabaseWrapper(arsDatabase);
-        wrapperD = new DatabaseUserWrapper(arsDatabase);
+        wrapperD = new DatabaseUserWrapper(userDatabase);
     }
 
     private static void loadPlugins() throws SQLException {
@@ -244,13 +254,13 @@ public class ARSReloaded {
             return ns.update();
         });
 
-        post("/syncronize", (request, response) -> {
+        post("/synchronize", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
             return getWrapper().getReport(users);
         });
 
-        post("/syncronize_user", (request, response) -> {
+        post("/synchronize_user", (request, response) -> {
             String json = request.body();
             Users s = GSON.fromJson(json, Users.class);
             return GSON.toJson(getWrapper().synchronizeUser(s));
@@ -258,7 +268,7 @@ public class ARSReloaded {
 
         get("/allvessels", (request, response) -> {
             if (vesselsCache != null)
-                return vesselsCache;
+                return GSON.toJson(vesselsCache);
             return GSON.toJson(getWrapper().getAllVessels());
         });
 

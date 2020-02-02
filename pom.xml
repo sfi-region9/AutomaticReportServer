@@ -23,7 +23,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fr.colin.arsreloaded.ARSReloaded</mainClass>
+                            <mainClass>fr.charlotte.arsreloaded.ARSReloaded</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -47,7 +47,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fr.colin.arsreloaded.ARSReloaded</mainClass>
+                            <mainClass>fr.charlotte.arsreloaded.ARSReloaded</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -68,6 +68,11 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>1.2</version>
+        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

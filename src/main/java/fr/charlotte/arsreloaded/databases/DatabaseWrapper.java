@@ -23,6 +23,10 @@ public class DatabaseWrapper {
 
     private Database arsDatabase;
 
+    /**
+     * Main constructor for the Wrapper of the Database interactions
+     * @param arsDatabase The Database
+     */
     public DatabaseWrapper(Database arsDatabase) {
         this.arsDatabase = arsDatabase;
     }
