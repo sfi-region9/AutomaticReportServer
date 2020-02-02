@@ -141,6 +141,11 @@ public class DatabaseWrapper {
         return true;
     }
 
+    /**
+     * A method to get if a member is a CO of a vessel.
+     * @param coID The ID of the member
+     * @return If the CO is a CO
+     */
     public boolean isCo(String coID) {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
         try {
@@ -296,13 +301,19 @@ public class DatabaseWrapper {
         arsDatabase.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselID(), v.constructNewReport(), user.getUuid()));
     }
 
-    public boolean switchVessel(Users u, String vesselID) {
-        if (!exist(u))
+    /**
+     * A method to change the vessel of an user
+     * @param users The User
+     * @param vesselID The ID of the New Vessel
+     * @return if the change was successfull
+     */
+    public boolean switchVessel(Users users, String vesselID) {
+        if (!exist(users))
             return false;
-        if (!verifyToken(u.getScc(), u.getUuid())) {
+        if (!verifyToken(users.getScc(), users.getUuid())) {
             return false;
         }
-        arsDatabase.update("UPDATE users SET vesselid='" + vesselID + "' WHERE scc='" + u.getScc() + "'");
+        arsDatabase.update("UPDATE users SET vesselid='" + vesselID + "' WHERE scc='" + users.getScc() + "'");
         return true;
     }
 
