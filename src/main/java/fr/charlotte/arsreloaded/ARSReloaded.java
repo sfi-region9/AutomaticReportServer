@@ -42,6 +42,8 @@ public class ARSReloaded {
     public static HashMap<Integer, Integer> vesselByIdCache = null;
     public static ArrayList<Vessel> vesselsCache = null;
 
+    public static String ARS_VERSION = "v2.0";
+
     public static String ADMIN_ID = "";
     private static String TOKEN = "";
     private static String ACCESS_TOKEN = "";
@@ -136,7 +138,7 @@ public class ARSReloaded {
     private static void loadSpark() throws InterruptedException {
         Thread.sleep(100);
         System.out.println("   ");
-        System.out.println("Welcome in ARS v1.7");
+        System.out.println("Welcome in ARS " + ARS_VERSION);
         Locale.setDefault(Locale.FRANCE);
         System.out.println("Start Time : " + new SimpleDateFormat("dd/MM/YYYY hh:mm:ss").format(new Date(System.currentTimeMillis())));
         System.out.println("   ");
