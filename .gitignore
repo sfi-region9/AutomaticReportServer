@@ -10,6 +10,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+.idea/
 # Package Files #
 *.jar
 *.war
@@ -18,10 +19,20 @@
 *.zip
 *.tar.gz
 *.rar
+*.iml
 config.json
+plugins/
+ARSAppExtension/
+ARS-VersaillesPlugin-0.1S-jar-with-dependencies.jar/
+target/
+tokens/
+t
+t.py
+test
 src/main/resources/config.json
-src/main/java/fr/colin/arsreloaded/commands/LinkCommand.java
-src/main/java/fr/colin/arsreloaded/utils/DatabaseUserWrapper.java
+src/main/java/fr/charlotte/arsreloaded/commands/LinkCommand.java
+src/main/java/fr/charlotte/arsreloaded/databases/DatabaseUserWrapper.java
+ARSAppExtension/
 
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml

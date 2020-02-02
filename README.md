@@ -25,8 +25,8 @@ The SQL File for the database structure is in src/main/resource/db.sql
   <br><br>
   <h3>Contribute</h3>
   <p>All issues, pull request or stars are warm welcomed thanks :D !</p>
-  <p>Developped and Maintain by LT Charlotte THOMAS from the USS Versailles, R9</p>
+  <p>Developped and Maintain by LCDR Charlotte THOMAS from the USS Versailles, R9</p>
   <p>Hosted by USS Versailles</p>
-<p>Thanks to https://github.com/ananagame for the Database class</p>
+<p>Thanks to https://github.com/hugolgst for the Database class</p>
 <p>http://sfi.org</p>
 <p></p>
