@@ -2,10 +2,10 @@ package fr.charlotte.arsreloaded.databases;
 
 import fr.charlotte.arsreloaded.ARSReloaded;
 import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
+import fr.charlotte.arsreloaded.plugins.ReportProcessing;
 import fr.charlotte.arsreloaded.utils.Users;
 import fr.charlotte.arsreloaded.utils.Vessel;
 import fr.charlotte.arsreloaded.utils.VesselNotFoundException;
-import fr.charlotte.arsreloaded.plugins.ReportProcessing;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -354,7 +354,7 @@ public class DatabaseWrapper {
      *
      * @param scc   The SCC of the user
      * @param token The given token
-     * @return
+     * @return      If the token is valid
      */
     public boolean verifyToken(String scc, String token) {
         String storedToken = "";

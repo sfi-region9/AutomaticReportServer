@@ -6,7 +6,7 @@
     <groupId>fr.colin.ars</groupId>
     <artifactId>ARS-Reloaded</artifactId>
     <packaging>jar</packaging>
-    <version>1.5</version>
+    <version>2.0</version>
     <build>
         <plugins>
             <plugin>
@@ -50,6 +50,13 @@
                             <mainClass>fr.charlotte.arsreloaded.ARSReloaded</mainClass>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
                 </configuration>
             </plugin>
         </plugins>

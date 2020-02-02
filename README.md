@@ -18,6 +18,28 @@
 
 ### ✨ [Demo](https://api.sfiars.eu)
 
+## Install
+
+* Download source ```$git clone https://github.com/sfi-region9/AutomaticReportServer```
+* Add the configuration page to src/main/resources `$touch config.json`
+* Copy the following configuration structure :
+```json5 
+    {
+      "accessToken":"facebookPageToken",
+      "adminID":"adminMessengerID",
+      "secretKey":"facebookAppSecretKey",
+      "verifyToken":"facebookWebhookToken",
+      "dbHost":"host",
+      "dbName":"name",
+      "dbUser":"user",
+      "dbPassword":"password",
+      "dbUserName":"userDatabase"
+    }
+```
+* Build the server with `$mvn clean install`
+* Run the jar-with-dependencies
+* See the client here [Client](https://github.com/sfi-region9/ARS-Client-Web)
+
 ## Author
 
 👤 **Charlotte THOMAS**
