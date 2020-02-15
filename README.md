@@ -20,10 +20,10 @@
 
 ## Install
 
-* Download source ```$git clone https://github.com/sfi-region9/AutomaticReportServer```
-* Add the configuration page to src/main/resources `$touch config.json`
+* Download source ```$ git clone https://github.com/sfi-region9/AutomaticReportServer```
+* Add the configuration page to src/main/resources `$ touch config.json`
 * Copy the following configuration structure :
-```json5 
+```json5
     {
       "accessToken":"facebookPageToken",
       "adminID":"adminMessengerID",
@@ -36,8 +36,8 @@
       "dbUserName":"userDatabase"
     }
 ```
-* Build the server with `$mvn clean install`
-* Run the jar-with-dependencies
+* Build the server with `$ mvn clean install`
+* Run the jar-with-dependencies `$ java -jar ARS-Reloaded-*-jar-with-dependencies`
 * See the client here [Client](https://github.com/sfi-region9/ARS-Client-Web)
 
 ## Author
