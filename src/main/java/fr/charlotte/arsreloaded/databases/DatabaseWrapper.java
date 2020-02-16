@@ -25,6 +25,7 @@ public class DatabaseWrapper {
 
     /**
      * Main constructor for the Wrapper of the Database interactions
+     *
      * @param arsDatabase The Database
      */
     public DatabaseWrapper(Database arsDatabase) {
@@ -46,6 +47,8 @@ public class DatabaseWrapper {
         if (a.size() == 1) {
             a.clear();
         }
+        rs.close();
+        arsDatabase.closeConnection();
         return a;
     }
 
@@ -80,6 +83,7 @@ public class DatabaseWrapper {
             return false;
         }
         arsDatabase.update(String.format("INSERT INTO `waiting`(coid,vesselid,coscc, vesselname, date, region) VALUES('%s','%s','%s', '%s', '%s', %s)", senderID, vesselNameToID(vessel), scc, vessel, System.currentTimeMillis(), region));
+        arsDatabase.closeConnection();
         return true;
     }
 
@@ -93,6 +97,7 @@ public class DatabaseWrapper {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         if (!rs.next())
             throw new VesselNotFoundException();
+        arsDatabase.closeConnection();
         return rs.getString("coid");
     }
 
@@ -123,6 +128,8 @@ public class DatabaseWrapper {
 
         arsDatabase.update("DELETE FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         arsDatabase.update(String.format("INSERT INTO `vessels`(name,vesselid,coid,template,default_text,date,region) VALUES('%s','%s','%s','%s','%s', '%s', %s)", vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report", date, region));
+        rs.close();
+        arsDatabase.closeConnection();
         return true;
     }
 
@@ -138,21 +145,28 @@ public class DatabaseWrapper {
             return false;
         }
         arsDatabase.update("DELETE FROM `waiting` WHERE vesselid = '" + vesselID + "'");
+        rs.close();
+        arsDatabase.closeConnection();
         return true;
     }
 
     /**
      * A method to get if a member is a CO of a vessel.
+     *
      * @param coID The ID of the member
      * @return If the CO is a CO
      */
     public boolean isCo(String coID) {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
         try {
-            return rs.next();
+            boolean b = rs.next();
+            rs.close();
+            arsDatabase.closeConnection();
+            return b;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        arsDatabase.closeConnection();
         return false;
     }
 
@@ -166,7 +180,10 @@ public class DatabaseWrapper {
     public Vessel getVesselWithCo(String coID) throws SQLException {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
         rs.next();
-        return new Vessel(rs.getString("name").replace("_", " "), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
+        Vessel vessel = new Vessel(rs.getString("name").replace("_", " "), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
+        rs.close();
+        arsDatabase.closeConnection();
+        return vessel;
     }
 
     /**
@@ -178,7 +195,9 @@ public class DatabaseWrapper {
      * @throws SQLException
      */
     public boolean isCo(String vesselid, String coid) throws SQLException {
-        return arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coid + "' AND vesselid='" + vesselid + "'").next();
+        boolean b = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coid + "' AND vesselid='" + vesselid + "'").next();
+        arsDatabase.closeConnection();
+        return b;
     }
 
     /**
@@ -189,6 +208,7 @@ public class DatabaseWrapper {
      */
     public void changeVesselTemplate(Vessel vessel, String template) {
         arsDatabase.update("UPDATE vessels SET template='" + template + "' WHERE vesselid='" + vessel.getVesselID() + "'");
+        arsDatabase.closeConnection();
     }
 
     /**
@@ -199,6 +219,7 @@ public class DatabaseWrapper {
      */
     public void changeVesselTemplate(String vesselid, String template) {
         arsDatabase.update("UPDATE vessels SET template='" + template + "' WHERE vesselid='" + vesselid + "'");
+        arsDatabase.closeConnection();
     }
 
     /**
@@ -209,6 +230,7 @@ public class DatabaseWrapper {
      */
     public void changeVesselDefaultReport(Vessel vessel, String defaultReport) {
         arsDatabase.update("UPDATE vessels SET default_text='" + defaultReport + "' WHERE vesselid='" + vessel.getVesselID() + "'");
+        arsDatabase.closeConnection();
     }
 
     /**
@@ -219,6 +241,7 @@ public class DatabaseWrapper {
      */
     public void changeVesselDefaultReport(String vesselid, String defaultReport) {
         arsDatabase.update("UPDATE vessels SET default_text='" + defaultReport + "' WHERE vesselid='" + vesselid + "'");
+        arsDatabase.closeConnection();
     }
 
     /**
@@ -235,6 +258,7 @@ public class DatabaseWrapper {
             v.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text")));
         }
         ARSReloaded.vesselsCache = v;
+        arsDatabase.closeConnection();
         return v;
     }
 
@@ -245,7 +269,7 @@ public class DatabaseWrapper {
      * @return The Vessel object associated with the ID
      * @throws SQLException
      */
-    public Vessel getVesselById(String vesselID) throws SQLException {
+    private Vessel getVesselById(String vesselID) throws SQLException {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE vesselid='" + vesselID + "'");
         Vessel v = null;
         while (rs.next()) {
@@ -299,11 +323,13 @@ public class DatabaseWrapper {
             return;
 
         arsDatabase.update(String.format("INSERT INTO `users`(name,scc,vesselid,report,uuid) VALUES('%s','%s','%s','%s','%s')", user.getName(), user.getScc(), user.getVesselID(), v.constructNewReport(), user.getUuid()));
+        arsDatabase.closeConnection();
     }
 
     /**
      * A method to change the vessel of an user
-     * @param users The User
+     *
+     * @param users    The User
      * @param vesselID The ID of the New Vessel
      * @return if the change was successfull
      */
@@ -314,6 +340,7 @@ public class DatabaseWrapper {
             return false;
         }
         arsDatabase.update("UPDATE users SET vesselid='" + vesselID + "' WHERE scc='" + users.getScc() + "'");
+        arsDatabase.closeConnection();
         return true;
     }
 
@@ -329,6 +356,7 @@ public class DatabaseWrapper {
         }
 
         arsDatabase.update("DELETE FROM users WHERE scc='" + user.getScc() + "'");
+        arsDatabase.closeConnection();
         return "User removed";
     }
 
@@ -345,6 +373,7 @@ public class DatabaseWrapper {
             return "ID Invalid";
         }
         arsDatabase.update("UPDATE `users` SET report='" + users.getReport().replace("\n", "\\n") + "' WHERE scc='" + users.getScc() + "'");
+        arsDatabase.closeConnection();
         return "Save";
     }
 
@@ -354,7 +383,7 @@ public class DatabaseWrapper {
      *
      * @param scc   The SCC of the user
      * @param token The given token
-     * @return      If the token is valid
+     * @return If the token is valid
      */
     public boolean verifyToken(String scc, String token) {
         String storedToken = "";
@@ -363,6 +392,7 @@ public class DatabaseWrapper {
             if (!rs.next())
                 return false;
             storedToken = rs.getString("uuid");
+            arsDatabase.closeConnection();
             return storedToken.equals(token);
         } catch (SQLException e) {
             return false;
@@ -383,7 +413,9 @@ public class DatabaseWrapper {
         if (!verifyToken(users.getScc(), users.getUuid())) {
             return "ID Invalid";
         }
-        return ((String) arsDatabase.read("SELECT * FROM `users` WHERE scc='" + users.getScc() + "'", "report")).replace("\n", "\\n");
+        String s = ((String) arsDatabase.read("SELECT * FROM `users` WHERE scc='" + users.getScc() + "'", "report")).replace("\n", "\\n");
+        arsDatabase.closeConnection();
+        return s;
     }
 
     /**
@@ -408,11 +440,14 @@ public class DatabaseWrapper {
             if (r.equalsIgnoreCase(v.constructNewReport())) {
                 r = v.constructFullReport();
             }
-            return new Users(rs.getString("name"), rs.getString("scc"), rs.getString("vesselid"), r, rs.getString("uuid"));
+            Users user = new Users(rs.getString("name"), rs.getString("scc"), rs.getString("vesselid"), r, rs.getString("uuid"));
+            rs.close();
+            arsDatabase.closeConnection();
+            return user;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new Users("invalidID", "", "", "");
+        return new Users("invalidID", "invalidSCC", "", "");
     }
 
     /**
@@ -435,7 +470,7 @@ public class DatabaseWrapper {
             }
             sd.put(i, s);
         }
-
+        arsDatabase.closeConnection();
         if (ARSReloaded.vesselByIdCache == null)
             ARSReloaded.vesselByIdCache = sd;
         return sd;
@@ -466,6 +501,7 @@ public class DatabaseWrapper {
                 e.printStackTrace();
             }
         }
+        arsDatabase.closeConnection();
         return p;
     }
 
@@ -514,6 +550,7 @@ public class DatabaseWrapper {
         message.add(u.constructReport(vessel));
         message.add("--------------------------------------------------------------------");
         arsDatabase.update("UPDATE `users` SET report='" + vessel.constructNewReport() + "' WHERE scc='" + u.getScc() + "'");
+        arsDatabase.closeConnection();
         ReportProcessing rp = ARSReloaded.processingHashMap.get(vessel.getVesselID());
         if (rp != null)
             rp.process(u, vessel);
@@ -534,6 +571,7 @@ public class DatabaseWrapper {
 
         setLast();
         keepTrackReports(reports.intValue());
+        arsDatabase.closeConnection();
         return "Report";
     }
 
@@ -544,7 +582,9 @@ public class DatabaseWrapper {
      * @return The timestamp.
      */
     public Long getLast() {
-        return (Long) arsDatabase.read("SELECT * FROM `properties` WHERE id=0", "last");
+        Long l = (Long) arsDatabase.read("SELECT * FROM `properties` WHERE id=0", "last");
+        arsDatabase.closeConnection();
+        return l;
     }
 
 
@@ -553,6 +593,7 @@ public class DatabaseWrapper {
      */
     public void setLast() {
         arsDatabase.update("UPDATE `properties` SET last=" + System.currentTimeMillis() + " WHERE id=0");
+        arsDatabase.closeConnection();
     }
 
 
