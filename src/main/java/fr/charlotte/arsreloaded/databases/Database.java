@@ -12,6 +12,23 @@ public class Database {
 
     private Connection connection;
 
+    private String host;
+    private String database;
+    private String user;
+    private String pass;
+
+    private void connect() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            this.connection = DriverManager.getConnection("jdbc:mysql://" + host + ":3306/" + database, user, pass);
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error");
+            ;
+        }
+    }
+
     /**
      * Create a database instance and connect
      *
@@ -21,16 +38,10 @@ public class Database {
      * @param pass     User password
      */
     public Database(String host, String database, String user, String pass) {
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-
-            this.connection = DriverManager.getConnection("jdbc:mysql://" + host + ":3306/" + database, user, pass);
-        } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.out.println("Error");
-            ;
-        }
+        this.host = host;
+        this.database = database;
+        this.user = user;
+        this.pass = pass;
     }
 
     public Connection getConnection() {
@@ -47,6 +58,9 @@ public class Database {
     public Object read(String query, String get) {
         Object request = null;
 
+        while (connection == null)
+            connect();
+
         try {
             PreparedStatement sts = this.connection.prepareStatement(query);
             ResultSet result = sts.executeQuery();
@@ -56,7 +70,6 @@ public class Database {
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
-
         return request;
     }
 
@@ -79,7 +92,6 @@ public class Database {
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
-
         return request;
     }
 
@@ -89,6 +101,10 @@ public class Database {
      * @param query MySQL writted request
      */
     public void update(String query) {
+
+        while (connection == null)
+            connect();
+
         try {
             PreparedStatement sts = this.connection.prepareStatement(query);
             sts.executeUpdate();
@@ -98,11 +114,24 @@ public class Database {
         }
     }
 
+    public void closeConnection() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        connection = null;
+    }
+
     /**
      * @param query MySQL writted request
      * @return
      */
     public ResultSet getResult(String query) {
+
+        while (connection == null)
+            connect();
+
         Object request = null;
         try {
             PreparedStatement pst = connection.prepareStatement(query);
