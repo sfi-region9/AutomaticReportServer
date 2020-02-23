@@ -27,7 +27,7 @@ public class LinkCommand extends Command {
             sendMessage(senderID, "The uuid or username you type is invalid.");
             return;
         }
-        sendMessage(senderID, "Your messengerid was successfully linked to your ARW account !");
+        sendMessage(senderID, "Your messenger account was successfully linked to your ARW account !");
     }
 
 
