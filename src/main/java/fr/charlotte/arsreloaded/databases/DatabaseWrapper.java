@@ -160,10 +160,14 @@ public class DatabaseWrapper {
     public boolean isCo(String coID) {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
         try {
-            boolean b = rs.next();
+            if(!rs.next()) {
+                rs.close();
+                arsDatabase.closeConnection();
+                return false;
+            }
             rs.close();
             arsDatabase.closeConnection();
-            return b;
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }

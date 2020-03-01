@@ -166,7 +166,8 @@ public class ARSReloaded {
     /**
      * Setup all the route in a separated method
      */
-    private static void setupRoutes() {
+
+    private static void setupRootRoute() {
         get("/", (request, response) -> {
             if (request.queryParams().isEmpty())
                 return "Invalid";
@@ -175,15 +176,6 @@ public class ARSReloaded {
                 return request.queryParams("hub.challenge");
             return "Invalid";
         });
-
-        get("/vessel_by_regions", (request, response) -> {
-            if (vesselByIdCache == null)
-                return GSON.toJson(getWrapper().getVesselByRegions());
-            return GSON.toJson(vesselByIdCache);
-        });
-
-        get("/reports_by_date", (request, response) -> GSON.toJson(trackedReports));
-
         post("/", (request, response) -> {
             String payload = request.body();
             messenger.onReceiveEvents(payload, java.util.Optional.ofNullable(request.headers(Messenger.SIGNATURE_HEADER_NAME)), event -> {
@@ -194,6 +186,25 @@ public class ARSReloaded {
             });
             return "H";
         });
+    }
+
+    private static void setupMetricsRoutes() {
+        get("/vessel_by_regions", (request, response) -> {
+            if (vesselByIdCache == null)
+                return GSON.toJson(getWrapper().getVesselByRegions());
+            return GSON.toJson(vesselByIdCache);
+        });
+
+        get("/allvessels", (request, response) -> {
+            if (vesselsCache != null)
+                return GSON.toJson(vesselsCache);
+            return GSON.toJson(getWrapper().getAllVessels());
+        });
+
+        get("/reports_by_date", (request, response) -> GSON.toJson(trackedReports));
+    }
+
+    private static void setupUserRoutes() {
         post("/register_user", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
@@ -206,13 +217,9 @@ public class ARSReloaded {
             Users users = GSON.fromJson(json, Users.class);
             return getWrapper().destroyUser(users);
         });
+    }
 
-        post("/submit", (request, response) -> {
-            String json = request.body();
-            Users users = GSON.fromJson(json, Users.class);
-            return getWrapper().saveReport(users);
-        });
-
+    private static void setupVerificationsRoutes() {
         get("/verify_token", (request, response) -> {
             if (request.queryParams().isEmpty())
                 return "Error please send params";
@@ -228,33 +235,9 @@ public class ARSReloaded {
             CheckCo co = GSON.fromJson(json, CheckCo.class);
             return co.process();
         });
+    }
 
-        post("/update_template", (request, response) -> {
-            String json = request.body();
-            CheckVessel v = GSON.fromJson(json, CheckVessel.class);
-            return v.update();
-        });
-
-        post("/switch_vessel", (request, response) -> {
-            String json = request.body();
-            Users users = GSON.fromJson(json, Users.class);
-            return getWrapper().switchVessel(users, users.getVesselID());
-        });
-
-        get("/send", (request, response) -> {
-            if (request.queryParams().isEmpty())
-                return false;
-            if (request.queryParams("password").contains("accessgranted"))
-                getWrapper().sendReports();
-            return "congratulations";
-        });
-
-        post("/update_name", (request, response) -> {
-            String json = request.body();
-            CheckVesselName ns = GSON.fromJson(json, CheckVesselName.class);
-            return ns.update();
-        });
-
+    private static void setupSynchronizedRoutes() {
         post("/synchronize", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
@@ -266,16 +249,44 @@ public class ARSReloaded {
             Users s = GSON.fromJson(json, Users.class);
             return GSON.toJson(getWrapper().synchronizeUser(s));
         });
+    }
 
-        get("/allvessels", (request, response) -> {
-            if (vesselsCache != null)
-                return GSON.toJson(vesselsCache);
-            return GSON.toJson(getWrapper().getAllVessels());
+    private static void setupSubmitRoutes() {
+        post("/submit", (request, response) -> {
+            String json = request.body();
+            Users users = GSON.fromJson(json, Users.class);
+            return getWrapper().saveReport(users);
+        });
+        post("/update_template", (request, response) -> {
+            String json = request.body();
+            CheckVessel v = GSON.fromJson(json, CheckVessel.class);
+            return v.update();
+        });
+    }
+
+    private static void setupUpdateRoute() {
+        post("/switch_vessel", (request, response) -> {
+            String json = request.body();
+            Users users = GSON.fromJson(json, Users.class);
+            return getWrapper().switchVessel(users, users.getVesselID());
         });
 
+        post("/update_name", (request, response) -> {
+            String json = request.body();
+            CheckVesselName ns = GSON.fromJson(json, CheckVesselName.class);
+            return ns.update();
+        });
+    }
+
+    private static void setupRoutes() {
+        setupRootRoute();
+        setupMetricsRoutes();
+        setupUserRoutes();
+        setupVerificationsRoutes();
+        setupSubmitRoutes();
+        setupUpdateRoute();
 
         get("/send", (request, response) -> getWrapper().sendReports());
-
         get("/hello", (request, response) -> "Hello World");
     }
 

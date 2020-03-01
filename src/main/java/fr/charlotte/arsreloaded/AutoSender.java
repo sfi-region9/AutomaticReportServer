@@ -29,11 +29,7 @@ public class AutoSender implements Runnable {
         } else {
             detectDay = 30;
         }
-
-        if (detectDay == day && (last + 1000 * 60 * 60 * 24 * 10) < System.currentTimeMillis()) {
-            return true;
-        }
-        return false;
+        return detectDay == day && (last + 1000 * 60 * 60 * 24 * 10) < System.currentTimeMillis();
     }
 
     @Override
