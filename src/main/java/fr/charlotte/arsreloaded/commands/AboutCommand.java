@@ -6,7 +6,7 @@ import org.pf4j.Extension;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static fr.charlotte.arsreloaded.ARSReloaded.sendMultiMessage;
+import static fr.charlotte.arsreloaded.AutomaticReportServer.sendMultiMessage;
 
 @Extension
 public class AboutCommand extends Command {

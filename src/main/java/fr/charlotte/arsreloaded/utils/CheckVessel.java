@@ -1,6 +1,6 @@
 package fr.charlotte.arsreloaded.utils;
 
-import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.AutomaticReportServer;
 import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 
 import java.sql.SQLException;
@@ -18,7 +18,7 @@ public class CheckVessel {
     }
 
     public boolean update() {
-        DatabaseWrapper databaseWrapper = ARSReloaded.getWrapper();
+        DatabaseWrapper databaseWrapper = AutomaticReportServer.getWrapper();
         try {
             if (!databaseWrapper.isCo(vesselID, coID)) {
                 return false;

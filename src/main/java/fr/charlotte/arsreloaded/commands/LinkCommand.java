@@ -4,7 +4,7 @@ import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import org.pf4j.Extension;
 
-import static fr.charlotte.arsreloaded.ARSReloaded.*;
+import static fr.charlotte.arsreloaded.AutomaticReportServer.*;
 
 @Extension
 public class LinkCommand extends Command {

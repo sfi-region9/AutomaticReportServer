@@ -7,7 +7,7 @@ import org.pf4j.Extension;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import static fr.charlotte.arsreloaded.ARSReloaded.*;
+import static fr.charlotte.arsreloaded.AutomaticReportServer.*;
 
 @Extension
 public class SubscribeCommand extends Command {

@@ -29,7 +29,7 @@ import static spark.Spark.*;
 /**
  * Main class of the Messenger Bot and Spark HTTP API
  */
-public class ARSReloaded {
+public class AutomaticReportServer {
 
 
     private static Messenger messenger = null;
@@ -283,6 +283,7 @@ public class ARSReloaded {
         setupMetricsRoutes();
         setupUserRoutes();
         setupVerificationsRoutes();
+        setupSynchronizedRoutes();
         setupSubmitRoutes();
         setupUpdateRoute();
 

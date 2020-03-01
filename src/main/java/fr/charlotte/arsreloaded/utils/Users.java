@@ -1,6 +1,6 @@
 package fr.charlotte.arsreloaded.utils;
 
-import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.AutomaticReportServer;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class Users {
 
     public String constructReport(Vessel vessel) {
         ArrayList<String> str = new ArrayList<>();
-        str.add(vessel.getTemplate().replace("%name%", name).replace("%scc%", scc).replace("%date%", ARSReloaded.DATE.format(new Date(System.currentTimeMillis()))).replace("%month%", ARSReloaded.DATE_M.format(new Date(System.currentTimeMillis()))).replace("%year%", ARSReloaded.DATE_Y.format(new Date(System.currentTimeMillis()))).replace("%vesselname%", vessel.getName().replace("_", " ")));
+        str.add(vessel.getTemplate().replace("%name%", name).replace("%scc%", scc).replace("%date%", AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis()))).replace("%month%", AutomaticReportServer.DATE_M.format(new Date(System.currentTimeMillis()))).replace("%year%", AutomaticReportServer.DATE_Y.format(new Date(System.currentTimeMillis()))).replace("%vesselname%", vessel.getName().replace("_", " ")));
         str.addAll(Arrays.asList(report.split("\n")));
         return StringUtils.join(str, "\n");
     }

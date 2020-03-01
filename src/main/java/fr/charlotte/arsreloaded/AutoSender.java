@@ -13,7 +13,7 @@ import static java.lang.Thread.sleep;
 
 public class AutoSender implements Runnable {
 
-    private DatabaseWrapper databaseWrapper = new DatabaseWrapper(ARSReloaded.getArsDatabase());
+    private DatabaseWrapper databaseWrapper = new DatabaseWrapper(AutomaticReportServer.getArsDatabase());
 
     private boolean isTimeToSent() {
 
@@ -40,7 +40,7 @@ public class AutoSender implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            ARSReloaded.sendMessage(ARSReloaded.ADMIN_ID, "I'm still here");
+            AutomaticReportServer.sendMessage(AutomaticReportServer.ADMIN_ID, "I'm still here");
             System.out.println("Launching Automatic Launching Verification");
             if (isTimeToSent()) {
                 System.out.println("Time is now :D !");

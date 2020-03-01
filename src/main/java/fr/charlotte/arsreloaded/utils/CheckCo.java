@@ -1,6 +1,6 @@
 package fr.charlotte.arsreloaded.utils;
 
-import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.AutomaticReportServer;
 
 import java.sql.SQLException;
 
@@ -16,7 +16,7 @@ public class CheckCo {
 
     public boolean process() {
         try {
-            return ARSReloaded.getWrapper().isCo(vesselID, coID);
+            return AutomaticReportServer.getWrapper().isCo(vesselID, coID);
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -1,6 +1,5 @@
 package fr.charlotte.arsreloaded.commands;
 
-import fr.charlotte.arsreloaded.ARSReloaded;
 import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.utils.Vessel;
@@ -9,7 +8,7 @@ import org.pf4j.Extension;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static fr.charlotte.arsreloaded.ARSReloaded.*;
+import static fr.charlotte.arsreloaded.AutomaticReportServer.*;
 
 @Extension
 public class TemplateCommand extends Command {

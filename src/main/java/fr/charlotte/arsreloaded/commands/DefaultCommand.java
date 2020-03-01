@@ -1,6 +1,6 @@
 package fr.charlotte.arsreloaded.commands;
 
-import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.AutomaticReportServer;
 import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.utils.Vessel;
@@ -9,8 +9,8 @@ import org.pf4j.Extension;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import static fr.charlotte.arsreloaded.ARSReloaded.sendMessage;
-import static fr.charlotte.arsreloaded.ARSReloaded.sendMultiMessage;
+import static fr.charlotte.arsreloaded.AutomaticReportServer.sendMessage;
+import static fr.charlotte.arsreloaded.AutomaticReportServer.sendMultiMessage;
 
 @Extension
 public class DefaultCommand extends Command {
@@ -29,21 +29,20 @@ public class DefaultCommand extends Command {
             sendMultiMessage(senderID, "Default Report Help", message);
             return;
         }
-        text = text.substring(9);
-        DatabaseWrapper dw = ARSReloaded.getWrapper();
+        String localText = text;
+        localText = localText.substring(9);
+        DatabaseWrapper dw = AutomaticReportServer.getWrapper();
         if (!dw.isCo(senderID)) {
             sendMessage(senderID, "You are not a CO of a vessel.");
             return;
         }
         try {
             Vessel vessel = dw.getVesselWithCo(senderID);
-            dw.changeVesselDefaultReport(vessel, text);
-            sendMessage(senderID, "You changed your chapter report default report to \n" + text);
+            dw.changeVesselDefaultReport(vessel, localText);
+            sendMessage(senderID, "You changed your chapter report default report to \n" + localText);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        //TODO : TEST AND UPDATE
     }
 
     @Override

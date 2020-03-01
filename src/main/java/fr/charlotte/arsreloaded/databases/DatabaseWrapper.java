@@ -1,6 +1,6 @@
 package fr.charlotte.arsreloaded.databases;
 
-import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.AutomaticReportServer;
 import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
 import fr.charlotte.arsreloaded.plugins.ReportProcessing;
 import fr.charlotte.arsreloaded.utils.Users;
@@ -118,14 +118,14 @@ public class DatabaseWrapper {
         String date = rs.getString("date");
         int region = rs.getInt("region");
 
-        if (ARSReloaded.vesselByIdCache == null)
+        if (AutomaticReportServer.vesselByIdCache == null)
             getVesselByRegions();
-        int regionSize = ARSReloaded.vesselByIdCache.get(region);
+        int regionSize = AutomaticReportServer.vesselByIdCache.get(region);
         regionSize++;
 
-        ARSReloaded.vesselByIdCache.remove(region);
-        ARSReloaded.vesselByIdCache.put(region, regionSize);
-        ARSReloaded.vesselsCache.add(new Vessel(vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report"));
+        AutomaticReportServer.vesselByIdCache.remove(region);
+        AutomaticReportServer.vesselByIdCache.put(region, regionSize);
+        AutomaticReportServer.vesselsCache.add(new Vessel(vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report"));
 
         arsDatabase.update("DELETE FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         arsDatabase.update(String.format("INSERT INTO `vessels`(name,vesselid,coid,template,default_text,date,region) VALUES('%s','%s','%s','%s','%s', '%s', %s)", vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report", date, region));
@@ -266,7 +266,7 @@ public class DatabaseWrapper {
         while (rs.next()) {
             v.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text")));
         }
-        ARSReloaded.vesselsCache = v;
+        AutomaticReportServer.vesselsCache = v;
         arsDatabase.closeConnection();
         return v;
     }
@@ -485,8 +485,8 @@ public class DatabaseWrapper {
             sd.put(i, s);
         }
         arsDatabase.closeConnection();
-        if (ARSReloaded.vesselByIdCache == null)
-            ARSReloaded.vesselByIdCache = sd;
+        if (AutomaticReportServer.vesselByIdCache == null)
+            AutomaticReportServer.vesselByIdCache = sd;
         return sd;
     }
 
@@ -517,7 +517,7 @@ public class DatabaseWrapper {
     }
 
     private HashMap<Vessel, ArrayList<Users>> getUsersByVessels() throws SQLException {
-        ArrayList<Vessel> vessels = ARSReloaded.vesselsCache;
+        ArrayList<Vessel> vessels = AutomaticReportServer.vesselsCache;
         HashMap<Vessel, ArrayList<Users>> usersByVessels = new HashMap<>();
         for (Vessel v : vessels) {
             ArrayList<Users> tempUsers = new ArrayList<>();
@@ -534,7 +534,7 @@ public class DatabaseWrapper {
         ArrayList<String> message = new ArrayList<>();
         int reports = 0;
 
-        message.add("Starting " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
+        message.add("Starting " + AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
         message.add("--------------------------------------------------------------------");
         message.add(" ");
         Users[] userList = new Users[usersList.size()];
@@ -547,13 +547,13 @@ public class DatabaseWrapper {
             reports++;
         }
 
-        ProcessAllReports par = ARSReloaded.processing.get(vessel.getVesselID());
+        ProcessAllReports par = AutomaticReportServer.processing.get(vessel.getVesselID());
         if (par != null)
             par.process(userList, vessel);
 
         message.add(" ");
-        message.add("End of " + ARSReloaded.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
-        ARSReloaded.sendMessage(vessel.getCoID(), StringUtils.join(message, "\n"));
+        message.add("End of " + AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
+        AutomaticReportServer.sendMessage(vessel.getCoID(), StringUtils.join(message, "\n"));
         return reports;
     }
 
@@ -562,7 +562,7 @@ public class DatabaseWrapper {
         message.add("--------------------------------------------------------------------");
         arsDatabase.update("UPDATE `users` SET report='" + vessel.constructNewReport() + "' WHERE scc='" + u.getScc() + "'");
         arsDatabase.closeConnection();
-        ReportProcessing rp = ARSReloaded.processingHashMap.get(vessel.getVesselID());
+        ReportProcessing rp = AutomaticReportServer.processingHashMap.get(vessel.getVesselID());
         if (rp != null)
             rp.process(u, vessel);
     }
