@@ -23,7 +23,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fr.charlotte.arsreloaded.ARSReloaded</mainClass>
+                            <mainClass>fr.charlotte.arsreloaded.AutomaticReportServer</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -47,7 +47,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fr.charlotte.arsreloaded.ARSReloaded</mainClass>
+                            <mainClass>fr.charlotte.arsreloaded.AutomaticReportServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
