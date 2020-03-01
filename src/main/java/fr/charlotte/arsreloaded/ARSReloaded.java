@@ -7,7 +7,6 @@ import com.github.messenger4j.send.MessagePayload;
 import com.github.messenger4j.send.MessagingType;
 import com.github.messenger4j.send.message.TextMessage;
 import com.google.gson.Gson;
-
 import fr.charlotte.arsreloaded.configuration.Config;
 import fr.charlotte.arsreloaded.databases.Database;
 import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;

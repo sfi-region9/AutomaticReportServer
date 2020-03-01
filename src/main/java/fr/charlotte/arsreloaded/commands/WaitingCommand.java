@@ -27,14 +27,15 @@ public class WaitingCommand extends Command {
             return;
         }
         switch (args[0]) {
-            case "show":
-                showList(senderID);
-                break;
             case "accept":
                 accept(senderID, args);
                 break;
             case "deny":
                 deny(senderID, args);
+                break;
+            default:
+                showList(senderID);
+                break;
         }
     }
 

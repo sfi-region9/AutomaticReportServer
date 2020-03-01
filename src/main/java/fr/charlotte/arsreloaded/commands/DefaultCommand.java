@@ -1,9 +1,9 @@
 package fr.charlotte.arsreloaded.commands;
 
 import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.utils.Vessel;
-import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import org.pf4j.Extension;
 
 import java.sql.SQLException;

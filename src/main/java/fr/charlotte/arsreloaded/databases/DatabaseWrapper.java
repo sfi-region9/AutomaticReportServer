@@ -21,6 +21,7 @@ import java.util.*;
 
 public class DatabaseWrapper {
 
+    private static SimpleDateFormat ukDateFormat = new SimpleDateFormat("YYYY-MM-dd", Locale.UK);
     private Database arsDatabase;
 
     /**
@@ -179,7 +180,11 @@ public class DatabaseWrapper {
      */
     public Vessel getVesselWithCo(String coID) throws SQLException {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
-        rs.next();
+        if(!rs.next()){
+            rs.close();
+            arsDatabase.closeConnection();
+            return new Vessel("USS Somevessel", "usssomevessel", "noone", "notemplate", "");
+        }
         Vessel vessel = new Vessel(rs.getString("name").replace("_", " "), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
         rs.close();
         arsDatabase.closeConnection();
@@ -285,9 +290,10 @@ public class DatabaseWrapper {
      * @return The ID from the name
      */
     private String vesselNameToID(String vesselName) {
-        vesselName = vesselName.replace("_", "");
-        vesselName = vesselName.toLowerCase();
-        return vesselName;
+        String tempVesselName = vesselName;
+        tempVesselName = tempVesselName.replace("_", "");
+        tempVesselName = tempVesselName.toLowerCase();
+        return tempVesselName;
     }
 
     /**
@@ -434,7 +440,11 @@ public class DatabaseWrapper {
         }
         ResultSet rs = arsDatabase.getResult("SELECT * FROM users WHERE scc='" + users.getScc() + "'");
         try {
-            rs.next();
+            if(!rs.next()){
+                rs.close();
+                arsDatabase.closeConnection();
+                return new Users("invalidID", "invalidSCC", "", "");
+            }
             String r = rs.getString("report");
             Vessel v = getVesselById(users.getVesselID());
             if (r.equalsIgnoreCase(v.constructNewReport())) {
@@ -475,9 +485,6 @@ public class DatabaseWrapper {
             ARSReloaded.vesselByIdCache = sd;
         return sd;
     }
-
-    private static SimpleDateFormat ukDateFormat = new SimpleDateFormat("YYYY-MM-dd", Locale.UK);
-
 
     private void keepTrackReports(int i) {
         ukDateFormat.setNumberFormat(NumberFormat.getNumberInstance(Locale.US));

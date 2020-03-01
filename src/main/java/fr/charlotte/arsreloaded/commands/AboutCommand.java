@@ -3,9 +3,10 @@ package fr.charlotte.arsreloaded.commands;
 import fr.charlotte.arsreloaded.plugins.Command;
 import org.pf4j.Extension;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-import static fr.charlotte.arsreloaded.ARSReloaded.*;
+import static fr.charlotte.arsreloaded.ARSReloaded.sendMultiMessage;
 
 @Extension
 public class AboutCommand extends Command {
@@ -13,6 +14,19 @@ public class AboutCommand extends Command {
     public AboutCommand() {
         super("about");
     }
+
+
+    public static void main(String[] args) throws IOException {
+        System.getenv().keySet().stream().filter(s -> s.contains("EPSILON_VERSION")).forEach(System.out::println);
+
+        for(String s : System.getenv().keySet()){
+            if(s.contains("EPSILON_VERSION")){
+                System.out.println(s);
+            }
+        }
+
+    }
+
 
 
     @Override

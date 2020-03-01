@@ -1,8 +1,7 @@
 package fr.charlotte.arsreloaded.commands;
 
-import fr.charlotte.arsreloaded.ARSReloaded;
-import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
+import fr.charlotte.arsreloaded.plugins.Command;
 import org.pf4j.Extension;
 
 import static fr.charlotte.arsreloaded.ARSReloaded.*;
@@ -21,7 +20,7 @@ public class LinkCommand extends Command {
         }
         String username = args[0];
         String uuid = args[1];
-        DatabaseUserWrapper duw = ARSReloaded.getWrapperD();
+        DatabaseUserWrapper duw = getWrapperD();
         boolean r = duw.updateId(username, uuid, senderID);
         if(!r){
             sendMessage(senderID, "The uuid or username you type is invalid.");

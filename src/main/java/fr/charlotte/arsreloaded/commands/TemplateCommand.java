@@ -1,9 +1,9 @@
 package fr.charlotte.arsreloaded.commands;
 
 import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.utils.Vessel;
-import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import org.pf4j.Extension;
 
 import java.sql.SQLException;
@@ -31,16 +31,17 @@ public class TemplateCommand extends Command {
             sendMultiMessage(senderID, "Template Help", message);
             return;
         }
-        text = text.substring(10);
-        DatabaseWrapper databaseWrapper = ARSReloaded.getWrapper();
+        String localText = text;
+        localText = localText.substring(10);
+        DatabaseWrapper databaseWrapper = getWrapper();
         if (!databaseWrapper.isCo(senderID)) {
             sendMessage(senderID, "You are not a CO of a vessel.");
             return;
         }
         try {
             Vessel vessel = databaseWrapper.getVesselWithCo(senderID);
-            databaseWrapper.changeVesselTemplate(vessel, text);
-            sendMessage(senderID, "You changed your chapter report template to \n" + text);
+            databaseWrapper.changeVesselTemplate(vessel, localText);
+            sendMessage(senderID, "You changed your chapter report template to \n" + localText);
         } catch (SQLException e) {
             e.printStackTrace();
         }

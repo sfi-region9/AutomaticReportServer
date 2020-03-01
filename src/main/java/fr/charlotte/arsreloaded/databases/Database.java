@@ -25,7 +25,6 @@ public class Database {
             throw new RuntimeException(e.getMessage());
         } catch (ClassNotFoundException e) {
             System.out.println("Error");
-            ;
         }
     }
 

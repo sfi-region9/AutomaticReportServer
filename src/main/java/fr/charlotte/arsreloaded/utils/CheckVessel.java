@@ -1,7 +1,7 @@
 package fr.charlotte.arsreloaded.utils;
 
-import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.ARSReloaded;
+import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 
 import java.sql.SQLException;
 
