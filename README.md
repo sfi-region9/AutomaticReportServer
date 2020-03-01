@@ -16,6 +16,8 @@
 
 ### 🏠 [Homepage](https://client.sfiars.eu)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/40efb16335f842fe9812e65295f04a71)](https://app.codacy.com/gh/sfi-region9/AutomaticReportServer?utm_source=github.com&utm_medium=referral&utm_content=sfi-region9/AutomaticReportServer&utm_campaign=Badge_Grade_Settings)
+
 ### ✨ [Demo](https://api.sfiars.eu)
 
 ## Install
