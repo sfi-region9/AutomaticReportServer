@@ -158,6 +158,7 @@ public class AutomaticReportServer {
         loadPlugins();
         loadSpark();
 
+        getWrapper().getAllVessels();
 
         Thread verifier = new Thread(new AutoSender());
         verifier.start();
@@ -172,6 +173,8 @@ public class AutomaticReportServer {
             if (request.queryParams().isEmpty())
                 return "Invalid";
             String sentToken = request.queryParams("hub.verify_token");
+            if(sentToken == null)
+                return "Invalid";
             if (sentToken.equalsIgnoreCase(TOKEN))
                 return request.queryParams("hub.challenge");
             return "Invalid";
