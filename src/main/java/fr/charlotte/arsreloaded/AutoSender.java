@@ -7,10 +7,6 @@ import java.util.Calendar;
 
 import static java.lang.Thread.sleep;
 
-/**
- * Simple runnable class, this class send reports every 30th of each month - except february.
- */
-
 public class AutoSender implements Runnable {
 
     private DatabaseWrapper databaseWrapper = new DatabaseWrapper(AutomaticReportServer.getArsDatabase());
