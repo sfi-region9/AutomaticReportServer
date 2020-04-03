@@ -14,7 +14,7 @@ public class PingCommand extends Command {
     @Override
     public void onCommand(String senderID, String text, String[] args) {
         System.out.println("Ping Command received from " + senderID);
-        AutomaticReportServer.sendMessage(senderID, "Pong !!, Version " + AutomaticReportServer.ARS_VERSION + ", Developed by LCDR Charlotte THOMAS");
+        AutomaticReportServer.sendMessage(senderID, "Pong !!, Version " + AutomaticReportServer.ARS_VERSION + ", Developed by CMDR Charlotte THOMAS");
     }
 
     @Override

@@ -36,7 +36,6 @@ public class AutoSender implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            AutomaticReportServer.sendMessage(AutomaticReportServer.ADMIN_ID, "I'm still here");
             System.out.println("Launching Automatic Launching Verification");
             if (isTimeToSent()) {
                 System.out.println("Time is now :D !");

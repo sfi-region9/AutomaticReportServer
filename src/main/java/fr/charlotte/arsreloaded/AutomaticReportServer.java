@@ -18,6 +18,8 @@ import fr.charlotte.arsreloaded.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
+import org.simplejavamail.email.EmailBuilder;
+import org.simplejavamail.mailer.Mailer;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -44,9 +46,11 @@ public class AutomaticReportServer {
     public static String ARS_VERSION = "v2.0";
 
     public static String ADMIN_ID = "";
+    public static String ADMIN_MAIL = "";
     private static String TOKEN = "";
     private static String ACCESS_TOKEN = "";
     private static String SECRET = "";
+    private static String ARSMAIL = "";
 
     public static HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
     public static HashMap<String, ProcessAllReports> processing = new HashMap<>();
@@ -55,6 +59,8 @@ public class AutomaticReportServer {
     public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
     public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
     public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
+
+    private static Mailer mailer;
 
 
     private final static Gson GSON = new Gson();
@@ -84,13 +90,17 @@ public class AutomaticReportServer {
         SECRET = config.getSecretKey();
         ADMIN_ID = config.getAdminID();
         TOKEN = config.getVerifyToken();
+        ARSMAIL = config.getMailUser();
+        ADMIN_MAIL = config.getAdminMail();
 
         arsDatabase = config.setupMainDatabase();
         userDatabase = config.setupUserDatabase();
 
         wrapper = new DatabaseWrapper(arsDatabase);
         wrapperD = new DatabaseUserWrapper(userDatabase);
+        mailer = config.buildMailer();
     }
+
 
     private static void loadPlugins() throws SQLException {
         processingHashMap.clear();
@@ -173,7 +183,7 @@ public class AutomaticReportServer {
             if (request.queryParams().isEmpty())
                 return "Invalid";
             String sentToken = request.queryParams("hub.verify_token");
-            if(sentToken == null)
+            if (sentToken == null)
                 return "Invalid";
             if (sentToken.equalsIgnoreCase(TOKEN))
                 return request.queryParams("hub.challenge");
@@ -292,6 +302,10 @@ public class AutomaticReportServer {
 
         get("/send", (request, response) -> getWrapper().sendReports());
         get("/hello", (request, response) -> "Hello World");
+    }
+
+    public static void sendCompletedMail(String subject, String message, String recipientName, String recipientAdress) {
+        mailer.sendMail(EmailBuilder.startingBlank().from("ARS Mail Sender", ARSMAIL).to(recipientName, recipientAdress).withSubject(subject).withPlainText(message).buildEmail());
     }
 
 
