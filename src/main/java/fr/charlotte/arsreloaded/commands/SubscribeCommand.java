@@ -17,21 +17,24 @@ public class SubscribeCommand extends Command {
 
     @Override
     public void onCommand(String senderID, String text, String[] args) {
-        if (args.length < 2) {
+        if (args.length < 4) {
             sendMessage(senderID, "Usage : !subscribe" + this.args());
             return;
         }
         String scc;
         String name;
         String region;
-        if (args.length == 3) {
+        String mail;
+        if (args.length == 4) {
             scc = args[0];
-            name = args[2];
+            name = args[3];
             region = args[1];
+            mail = args[2];
         } else {
             scc = args[0];
             region = args[1];
-            String[] names = Arrays.copyOfRange(args, 2, args.length);
+            mail = args[2];
+            String[] names = Arrays.copyOfRange(args, 3, args.length);
             name = StringUtils.join(names, "_");
         }
         int re;
@@ -46,10 +49,10 @@ public class SubscribeCommand extends Command {
             return;
         }
         try {
-            boolean result = getWrapper().addWaiting(senderID, name, scc, re);
+            boolean result = getWrapper().addWaiting(senderID, name, scc, re, mail);
             if (result) {
                 sendMessage(senderID, "Your vessel is successfully registered in the database !");
-                sendMessage(ADMIN_ID, "You have a new pending registry from " + scc + " for the vessel " + name);
+                sendCompletedMail("New Pending Vessel in ARS", "You have a new pending vessel in ARS!", "Administrator", ADMIN_MAIL);
             } else {
                 sendMessage(senderID, "Your vessel already exist in the database !");
             }
@@ -66,6 +69,6 @@ public class SubscribeCommand extends Command {
 
     @Override
     public String args() {
-        return " [scc] [region] [vesselname]";
+        return " [scc] [region] [mail] [vesselname]";
     }
 }

@@ -79,11 +79,11 @@ public class DatabaseWrapper {
      * @param scc      The SCC of the CO
      * @return if the register is successful
      */
-    public boolean addWaiting(String senderID, String vessel, String scc, int region) throws SQLException {
+    public boolean addWaiting(String senderID, String vessel, String scc, int region, String mail) throws SQLException {
         if (coExist(senderID)) {
             return false;
         }
-        arsDatabase.update(String.format("INSERT INTO `waiting`(coid,vesselid,coscc, vesselname, date, region) VALUES('%s','%s','%s', '%s', '%s', %s)", senderID, vesselNameToID(vessel), scc, vessel, System.currentTimeMillis(), region));
+        arsDatabase.update(String.format("INSERT INTO `waiting`(coid,vesselid,coscc, vesselname, date, region, email) VALUES('%s','%s','%s', '%s', '%s', %s, '%s')", senderID, vesselNameToID(vessel), scc, vessel, System.currentTimeMillis(), region, mail));
         arsDatabase.closeConnection();
         return true;
     }
@@ -98,8 +98,9 @@ public class DatabaseWrapper {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         if (!rs.next())
             throw new VesselNotFoundException();
+        String r = rs.getString("coid");
         arsDatabase.closeConnection();
-        return rs.getString("coid");
+        return r;
     }
 
     /**
@@ -108,15 +109,16 @@ public class DatabaseWrapper {
      * @param vesselID The ID of the Vessel
      * @return if the switch is successful
      */
-    public boolean switchPending(String vesselID) throws SQLException {
+    public String switchPending(String vesselID) throws SQLException {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         if (!rs.next()) {
-            return false;
+            return "false";
         }
         String coID = rs.getString("coid");
         String vesselName = rs.getString("vesselname");
         String date = rs.getString("date");
         int region = rs.getInt("region");
+        String mail = rs.getString("email");
 
         if (AutomaticReportServer.vesselByIdCache == null)
             getVesselByRegions();
@@ -125,13 +127,13 @@ public class DatabaseWrapper {
 
         AutomaticReportServer.vesselByIdCache.remove(region);
         AutomaticReportServer.vesselByIdCache.put(region, regionSize);
-        AutomaticReportServer.vesselsCache.add(new Vessel(vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report"));
+        AutomaticReportServer.vesselsCache.add(new Vessel(vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report", ""));
 
         arsDatabase.update("DELETE FROM `waiting` WHERE vesselid = '" + vesselID + "'");
-        arsDatabase.update(String.format("INSERT INTO `vessels`(name,vesselid,coid,template,default_text,date,region) VALUES('%s','%s','%s','%s','%s', '%s', %s)", vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report", date, region));
+        arsDatabase.update(String.format("INSERT INTO `vessels`(name,vesselid,coid,template,default_text,date,region,email) VALUES('%s','%s','%s','%s','%s', '%s', %s, '%s')", vesselName, vesselID, coID, "Name : %name%\\nDate : %date%\\nSCC : %scc%\\n", "#Nothing to report", date, region, mail));
         rs.close();
         arsDatabase.closeConnection();
-        return true;
+        return mail;
     }
 
     /**
@@ -140,15 +142,16 @@ public class DatabaseWrapper {
      * @param vesselID The ID of the Vessel
      * @return if the deleting is successful
      */
-    public boolean deletePending(String vesselID) throws SQLException {
+    public String deletePending(String vesselID) throws SQLException {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         if (!rs.next()) {
-            return false;
+            return "false";
         }
+        String mail = rs.getString("email");
         arsDatabase.update("DELETE FROM `waiting` WHERE vesselid = '" + vesselID + "'");
         rs.close();
         arsDatabase.closeConnection();
-        return true;
+        return mail;
     }
 
     /**
@@ -160,7 +163,7 @@ public class DatabaseWrapper {
     public boolean isCo(String coID) {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
         try {
-            if(!rs.next()) {
+            if (!rs.next()) {
                 rs.close();
                 arsDatabase.closeConnection();
                 return false;
@@ -184,12 +187,12 @@ public class DatabaseWrapper {
      */
     public Vessel getVesselWithCo(String coID) throws SQLException {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coID + "'");
-        if(!rs.next()){
+        if (!rs.next()) {
             rs.close();
             arsDatabase.closeConnection();
-            return new Vessel("USS Somevessel", "usssomevessel", "noone", "notemplate", "");
+            return new Vessel("USS Somevessel", "usssomevessel", "noone", "notemplate", "", "");
         }
-        Vessel vessel = new Vessel(rs.getString("name").replace("_", " "), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
+        Vessel vessel = new Vessel(rs.getString("name").replace("_", " "), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"), rs.getString("email"));
         rs.close();
         arsDatabase.closeConnection();
         return vessel;
@@ -264,7 +267,7 @@ public class DatabaseWrapper {
         ArrayList<Vessel> v = new ArrayList<>();
 
         while (rs.next()) {
-            v.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text")));
+            v.add(new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"), rs.getString("email")));
         }
         AutomaticReportServer.vesselsCache = v;
         arsDatabase.closeConnection();
@@ -282,7 +285,7 @@ public class DatabaseWrapper {
         ResultSet rs = arsDatabase.getResult("SELECT * FROM vessels WHERE vesselid='" + vesselID + "'");
         Vessel v = null;
         while (rs.next()) {
-            v = new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"));
+            v = new Vessel(rs.getString("name"), rs.getString("vesselid"), rs.getString("coid"), rs.getString("template"), rs.getString("default_text"), rs.getString("email"));
         }
         return v;
     }
@@ -444,7 +447,7 @@ public class DatabaseWrapper {
         }
         ResultSet rs = arsDatabase.getResult("SELECT * FROM users WHERE scc='" + users.getScc() + "'");
         try {
-            if(!rs.next()){
+            if (!rs.next()) {
                 rs.close();
                 arsDatabase.closeConnection();
                 return new Users("invalidID", "invalidSCC", "", "");
@@ -553,7 +556,7 @@ public class DatabaseWrapper {
 
         message.add(" ");
         message.add("End of " + AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
-        AutomaticReportServer.sendMessage(vessel.getCoID(), StringUtils.join(message, "\n"));
+        AutomaticReportServer.sendCompletedMail(vessel.getName().replace("_", " ") + "'s Reports " + AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis())), StringUtils.join(message, "\n"), vessel.getName().replace("_", " "), vessel.getReportOfficerMail());
         return reports;
     }
 

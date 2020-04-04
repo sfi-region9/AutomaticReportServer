@@ -8,13 +8,15 @@ public class Vessel {
     private String coID;
     private String template;
     private String defaultReport;
+    private String reportOfficerMail;
 
-    public Vessel(String name, String vesselID, String coID, String template, String defaultReport) {
+    public Vessel(String name, String vesselID, String coID, String template, String defaultReport, String reportOfficerMail) {
         this.name = name;
         this.vesselID = vesselID;
         this.coID = coID;
         this.template = template;
         this.defaultReport = defaultReport;
+        this.reportOfficerMail = reportOfficerMail;
     }
 
     public String getDefaultReport() {
@@ -54,6 +56,10 @@ public class Vessel {
             }
         }
         return newDe.toString();
+    }
+
+    public String getReportOfficerMail() {
+        return reportOfficerMail;
     }
 
     public String getVesselID() {

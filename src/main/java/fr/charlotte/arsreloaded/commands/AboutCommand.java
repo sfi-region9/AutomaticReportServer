@@ -16,18 +16,6 @@ public class AboutCommand extends Command {
     }
 
 
-    public static void main(String[] args) throws IOException {
-        System.getenv().keySet().stream().filter(s -> s.contains("EPSILON_VERSION")).forEach(System.out::println);
-
-        for(String s : System.getenv().keySet()){
-            if(s.contains("EPSILON_VERSION")){
-                System.out.println(s);
-            }
-        }
-
-    }
-
-
 
     @Override
     public void onCommand(String senderID, String text, String[] args) {

@@ -48,15 +48,16 @@ public class WaitingCommand extends Command {
             sendMessage(senderID, "An error occured");
             return;
         }
-        boolean success = false;
+        String success = "false";
         try {
             success = getWrapper().deletePending(vesselID);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (success) {
+        if (!(success.equalsIgnoreCase("false"))) {
             sendMessage(senderID, "You denied the subscribe of " + coID + " CO of the " + vesselID);
             sendMessage(coID, "Your pending subscribe was denied by the administrator :(");
+            sendCompletedMail("ARS", "We're sorry your pending subscribe has been denied by the administrator, contact them via email", "CO", success);
         }
     }
 
@@ -66,18 +67,20 @@ public class WaitingCommand extends Command {
         try {
             coID = getWrapper().getPendingCoId(vesselID);
         } catch (SQLException | VesselNotFoundException e) {
+            e.printStackTrace();
             sendMessage(senderID, "An error occured");
             return;
         }
-        boolean success = false;
+        String success = "";
         try {
             success = getWrapper().switchPending(vesselID);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (success) {
+        if (!(success.equalsIgnoreCase("false"))) {
             sendMessage(senderID, "You accepted the subscribe of " + coID + " CO of the " + vesselID);
             sendMessage(coID, "Your pending subscribe was accepted by the administrator !");
+            sendCompletedMail("ARS", "Your pending subscribe was accepted by the administrator !", "CO", success);
         }
     }
 

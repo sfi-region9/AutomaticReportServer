@@ -3,6 +3,9 @@ package fr.charlotte.arsreloaded.configuration;
 import com.google.gson.Gson;
 import fr.charlotte.arsreloaded.databases.Database;
 import org.apache.commons.lang3.StringUtils;
+import org.simplejavamail.mailer.Mailer;
+import org.simplejavamail.mailer.MailerBuilder;
+import org.simplejavamail.mailer.config.TransportStrategy;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -20,9 +23,14 @@ public class Config {
     private String dbUser;
     private String dbUserName;
     private String dbPassword;
+    private String smtpHost;
+    private String mailUser;
+    private String mailPassword;
+    private String adminMail;
+    private int mailPort;
 
 
-    public Config(String accessToken, String adminID, String secretKey, String dbHost, String dbName, String dbUser, String dbUserName, String dbPassword, String verifyToken) {
+    public Config(String accessToken, String adminID, String secretKey, String dbHost, String dbName, String dbUser, String dbUserName, String dbPassword, String verifyToken, String smtpHost, String mailUser, String mailPassword, int mailPort, String adminMail) {
         this.accessToken = accessToken;
         this.adminID = adminID;
         this.secretKey = secretKey;
@@ -32,6 +40,15 @@ public class Config {
         this.dbUserName = dbUserName;
         this.dbPassword = dbPassword;
         this.verifyToken = verifyToken;
+        this.mailPassword = mailPassword;
+        this.mailUser = mailUser;
+        this.mailPort = mailPort;
+        this.smtpHost = smtpHost;
+        this.adminMail = adminMail;
+    }
+
+    public String getAdminMail() {
+        return adminMail;
     }
 
     public Database setupMainDatabase() {
@@ -52,6 +69,14 @@ public class Config {
 
     public String getSecretKey() {
         return secretKey;
+    }
+
+    public Mailer buildMailer(){
+        return MailerBuilder.withSMTPServer(smtpHost, mailPort, mailUser, mailPassword).withTransportStrategy(TransportStrategy.SMTP_TLS).buildMailer();
+    }
+
+    public String getMailUser() {
+        return mailUser;
     }
 
     public String getVerifyToken() {
