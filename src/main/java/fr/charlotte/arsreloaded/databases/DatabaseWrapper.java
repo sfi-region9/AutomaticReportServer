@@ -21,8 +21,8 @@ import java.util.*;
 
 public class DatabaseWrapper {
 
-    private static SimpleDateFormat ukDateFormat = new SimpleDateFormat("YYYY-MM-dd", Locale.UK);
-    private Database arsDatabase;
+    private final static SimpleDateFormat ukDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
+    private final Database arsDatabase;
 
     /**
      * Main constructor for the Wrapper of the Database interactions

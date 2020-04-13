@@ -14,20 +14,20 @@ import java.io.InputStreamReader;
 public class Config {
 
 
-    private String accessToken;
-    private String adminID;
-    private String secretKey;
-    private String verifyToken;
-    private String dbHost;
-    private String dbName;
-    private String dbUser;
-    private String dbUserName;
-    private String dbPassword;
-    private String smtpHost;
-    private String mailUser;
-    private String mailPassword;
-    private String adminMail;
-    private int mailPort;
+    private final String accessToken;
+    private final String adminID;
+    private final String secretKey;
+    private final String verifyToken;
+    private final String dbHost;
+    private final String dbName;
+    private final String dbUser;
+    private final String dbUserName;
+    private final String dbPassword;
+    private final String smtpHost;
+    private final String mailUser;
+    private final String mailPassword;
+    private final String adminMail;
+    private final int mailPort;
 
 
     public Config(String accessToken, String adminID, String secretKey, String dbHost, String dbName, String dbUser, String dbUserName, String dbPassword, String verifyToken, String smtpHost, String mailUser, String mailPassword, int mailPort, String adminMail) {
