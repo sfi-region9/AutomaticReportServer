@@ -43,7 +43,7 @@ public class AutomaticReportServer {
     public static HashMap<Integer, Integer> vesselByIdCache = null;
     public static ArrayList<Vessel> vesselsCache = null;
 
-    public static String ARS_VERSION = "v2.0";
+    public static String ARS_VERSION = "v3.0";
 
     public static String ADMIN_ID = "";
     public static String ADMIN_MAIL = "";
@@ -203,18 +203,23 @@ public class AutomaticReportServer {
 
     private static void setupMetricsRoutes() {
         get("/vessel_by_regions", (request, response) -> {
+            response.type("application/json");
             if (vesselByIdCache == null)
                 return GSON.toJson(getWrapper().getVesselByRegions());
             return GSON.toJson(vesselByIdCache);
         });
 
         get("/allvessels", (request, response) -> {
+            response.type("application/json");
             if (vesselsCache != null)
                 return GSON.toJson(vesselsCache);
             return GSON.toJson(getWrapper().getAllVessels());
         });
 
-        get("/reports_by_date", (request, response) -> GSON.toJson(trackedReports));
+        get("/reports_by_date", (request, response) -> {
+            response.type("application/json");
+            return GSON.toJson(trackedReports);
+        });
     }
 
     private static void setupUserRoutes() {
@@ -258,6 +263,7 @@ public class AutomaticReportServer {
         });
 
         post("/synchronize_user", (request, response) -> {
+            response.type("application/json");
             String json = request.body();
             Users s = GSON.fromJson(json, Users.class);
             return GSON.toJson(getWrapper().synchronizeUser(s));
