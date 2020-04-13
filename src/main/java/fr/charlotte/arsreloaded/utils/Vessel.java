@@ -3,12 +3,12 @@ package fr.charlotte.arsreloaded.utils;
 
 public class Vessel {
 
-    private String name;
-    private String vesselID;
-    private String coID;
-    private String template;
-    private String defaultReport;
-    private String reportOfficerMail;
+    private final String name;
+    private final String vesselID;
+    private final String coID;
+    private final String template;
+    private final String defaultReport;
+    private final String reportOfficerMail;
 
     public Vessel(String name, String vesselID, String coID, String template, String defaultReport, String reportOfficerMail) {
         this.name = name;

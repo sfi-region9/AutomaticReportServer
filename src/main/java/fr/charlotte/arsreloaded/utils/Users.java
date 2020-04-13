@@ -9,9 +9,9 @@ import java.util.Date;
 
 public class Users {
 
-    private String name;
-    private String scc;
-    private String vesselID;
+    private final String name;
+    private final String scc;
+    private final String vesselID;
     private String report = "";
     private String uuid = "defaultuuid";
 

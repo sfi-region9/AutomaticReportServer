@@ -15,6 +15,9 @@ import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
 import fr.charlotte.arsreloaded.plugins.ReportProcessing;
 import fr.charlotte.arsreloaded.utils.*;
+import fr.charlotte.arsreloaded.verifiers.implementations.CommandingOfficerVerifier;
+import fr.charlotte.arsreloaded.verifiers.implementations.VesselNameVerifier;
+import fr.charlotte.arsreloaded.verifiers.implementations.VesselTemplateVerifier;
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
@@ -250,8 +253,8 @@ public class AutomaticReportServer {
 
         post("/check_co", (request, response) -> {
             String json = request.body();
-            CheckCo co = GSON.fromJson(json, CheckCo.class);
-            return co.process();
+            CommandingOfficerVerifier co = GSON.fromJson(json, CommandingOfficerVerifier.class);
+            return co.update();
         });
     }
 
@@ -278,7 +281,7 @@ public class AutomaticReportServer {
         });
         post("/update_template", (request, response) -> {
             String json = request.body();
-            CheckVessel v = GSON.fromJson(json, CheckVessel.class);
+            VesselTemplateVerifier v = GSON.fromJson(json, VesselTemplateVerifier.class);
             return v.update();
         });
     }
@@ -292,7 +295,8 @@ public class AutomaticReportServer {
 
         post("/update_name", (request, response) -> {
             String json = request.body();
-            CheckVesselName ns = GSON.fromJson(json, CheckVesselName.class);
+            VesselNameVerifier ns = GSON.fromJson(json, VesselNameVerifier.class);
+            System.out.println(ns.update());
             return ns.update();
         });
     }
