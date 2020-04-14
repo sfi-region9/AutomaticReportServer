@@ -9,13 +9,16 @@ import static java.lang.Thread.sleep;
 
 public class AutoSender implements Runnable {
 
-    private DatabaseWrapper databaseWrapper = new DatabaseWrapper(AutomaticReportServer.getArsDatabase());
+    DatabaseWrapper wrapper;
+    public AutoSender(DatabaseWrapper wrapper){
+        this.wrapper = wrapper;
+    }
 
     private boolean isTimeToSent() {
 
         Calendar cal = Calendar.getInstance();
         int day = cal.get(Calendar.DAY_OF_MONTH);
-        long last = databaseWrapper.getLast();
+        long last = wrapper.getLast();
         int month = cal.get(Calendar.MONTH);
 
         int detectDay = 0;
@@ -40,8 +43,8 @@ public class AutoSender implements Runnable {
             if (isTimeToSent()) {
                 System.out.println("Time is now :D !");
                 try {
-                    databaseWrapper.sendReports();
-                    databaseWrapper.setLast();
+                    wrapper.sendReports();
+                    wrapper.setLast();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
