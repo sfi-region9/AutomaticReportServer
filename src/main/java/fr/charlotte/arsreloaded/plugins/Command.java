@@ -13,8 +13,8 @@ import java.util.HashMap;
 
 public abstract class Command implements ExtensionPoint {
 
-    private String name;
-    private String[] aliasies;
+    private final String name;
+    private final String[] aliases;
     protected boolean hidden = false;
     protected boolean permissionNeeded = false;
 
@@ -23,12 +23,12 @@ public abstract class Command implements ExtensionPoint {
 
     public Command(String name, String... alias) {
         this.name = name;
-        this.aliasies = alias;
+        this.aliases = alias;
     }
 
     public void register() {
         commands.put(name, this);
-        for (String s : aliasies) {
+        for (String s : aliases) {
             Command.alias.put(s, this);
         }
     }
@@ -43,11 +43,9 @@ public abstract class Command implements ExtensionPoint {
 
     public abstract void onCommand(String senderID, String text, String[] args, DatabaseWrapper wrapper, MessengerUtils utils, DatabaseUserWrapper userWrapper);
 
-
     public abstract String usage();
 
     public abstract String args();
-
 
     public boolean isHidden() {
         return hidden;

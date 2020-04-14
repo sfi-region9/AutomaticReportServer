@@ -8,11 +8,9 @@ import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
 import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
-import fr.charlotte.arsreloaded.plugins.ReportProcess;
 import fr.charlotte.arsreloaded.plugins.ReportProcessing;
 import fr.charlotte.arsreloaded.utils.MessengerUtils;
 import fr.charlotte.arsreloaded.utils.Users;
-import fr.charlotte.arsreloaded.utils.Vessel;
 import fr.charlotte.arsreloaded.verifiers.implementations.CommandingOfficerVerifier;
 import fr.charlotte.arsreloaded.verifiers.implementations.VesselNameVerifier;
 import fr.charlotte.arsreloaded.verifiers.implementations.VesselTemplateVerifier;
@@ -38,32 +36,28 @@ public class AutomaticReportServer {
     private static Database arsDatabase;
     private static DatabaseWrapper wrapper;
 
-    public static HashMap<Integer, Integer> vesselByIdCache = null;
-    public static ArrayList<Vessel> vesselsCache = null;
 
-    public static String ARS_VERSION = "v3.0";
-
-    public static String ADMIN_ID = "";
-    public static String ADMIN_MAIL = "";
+    private static String ADMIN_ID = "";
+    private static String ADMIN_MAIL = "";
     private static String TOKEN = "";
     private static String ACCESS_TOKEN = "";
     private static String SECRET = "";
     private static String ARSMAIL = "";
 
-    public static HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
-    public static HashMap<String, ProcessAllReports> processing = new HashMap<>();
+    private static final HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
+    private static final HashMap<String, ProcessAllReports> processing = new HashMap<>();
     private static TreeMap<String, Integer> trackedReports = new TreeMap<>();
 
-    public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
+    public static SimpleDateFormat DATE = new SimpleDateFormat("MM/yyyy");
     public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
-    public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
+    public static SimpleDateFormat DATE_Y = new SimpleDateFormat("yyyy");
 
     private static Mailer mailer;
 
 
     private final static Gson GSON = new Gson();
 
-    public static PluginManager plugins;
+    private static PluginManager plugins;
 
     public static void main(String... args) throws InterruptedException, SQLException {
         loadARS();
@@ -90,7 +84,7 @@ public class AutomaticReportServer {
         arsDatabase = config.setupMainDatabase();
         userDatabase = config.setupUserDatabase();
 
-        wrapper = new DatabaseWrapper(arsDatabase);
+        wrapper = new DatabaseWrapper(arsDatabase, processingHashMap, processing, new MessengerUtils(messenger, mailer, ARSMAIL, ADMIN_MAIL));
         mailer = config.buildMailer();
     }
 
@@ -140,6 +134,7 @@ public class AutomaticReportServer {
     private static void loadSpark() throws InterruptedException {
         Thread.sleep(100);
         System.out.println("   ");
+        String ARS_VERSION = "v3.0";
         System.out.println("Welcome in ARS " + ARS_VERSION);
         Locale.setDefault(Locale.FRANCE);
         System.out.println("Start Time : " + new SimpleDateFormat("dd/MM/YYYY hh:mm:ss").format(new Date(System.currentTimeMillis())));
@@ -157,10 +152,10 @@ public class AutomaticReportServer {
     }
 
     private static void loadARS() throws InterruptedException, SQLException {
-        loadConfig();
+
         loadPlugins();
         loadSpark();
-
+        loadConfig();
         wrapper.getAllVessels();
 
         Thread verifier = new Thread(new AutoSender(wrapper));
@@ -197,15 +192,15 @@ public class AutomaticReportServer {
     private static void setupMetricsRoutes() {
         get("/vessel_by_regions", (request, response) -> {
             response.type("application/json");
-            if (vesselByIdCache == null)
+            if (wrapper.getVesselByIdCache() == null)
                 return GSON.toJson(wrapper.getVesselByRegions());
-            return GSON.toJson(vesselByIdCache);
+            return GSON.toJson(wrapper.getVesselByIdCache());
         });
 
         get("/allvessels", (request, response) -> {
             response.type("application/json");
-            if (vesselsCache != null)
-                return GSON.toJson(vesselsCache);
+            if (wrapper.getVesselsCache() != null)
+                return GSON.toJson(wrapper.getVesselsCache());
             return GSON.toJson(wrapper.getAllVessels());
         });
 
@@ -329,7 +324,7 @@ public class AutomaticReportServer {
             c = Command.commands.get(command);
         else
             c = Command.alias.get(command);
-        c.execute(recipientID, text, args, new DatabaseWrapper(arsDatabase), utils, new DatabaseUserWrapper(userDatabase), ADMIN_ID);
+        c.execute(recipientID, text, args, wrapper, utils, new DatabaseUserWrapper(userDatabase), ADMIN_ID);
     }
 
 }
