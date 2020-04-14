@@ -57,8 +57,6 @@ public class AutomaticReportServer {
 
     private final static Gson GSON = new Gson();
 
-    private static PluginManager plugins;
-
     public static void main(String... args) throws InterruptedException, SQLException {
         loadARS();
         trackedReports = wrapper.getTrackedReports();
@@ -95,7 +93,7 @@ public class AutomaticReportServer {
         if (!file.exists())
             file.mkdir();
         System.out.println(file.getAbsolutePath());
-        plugins = new JarPluginManager(file.toPath());
+        PluginManager plugins = new JarPluginManager(file.toPath());
         plugins.loadPlugins();
         plugins.startPlugins();
 
