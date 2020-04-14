@@ -1,7 +1,10 @@
 package fr.charlotte.arsreloaded.commands;
 
 import fr.charlotte.arsreloaded.AutomaticReportServer;
+import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
+import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
+import fr.charlotte.arsreloaded.utils.MessengerUtils;
 import org.pf4j.Extension;
 
 @Extension
@@ -12,9 +15,9 @@ public class PingCommand extends Command {
     }
 
     @Override
-    public void onCommand(String senderID, String text, String[] args) {
+    public void onCommand(String senderID, String text, String[] args, DatabaseWrapper wrapper, MessengerUtils utils, DatabaseUserWrapper userWrapper) {
         System.out.println("Ping Command received from " + senderID);
-        AutomaticReportServer.sendMessage(senderID, "Pong !!, Version " + AutomaticReportServer.ARS_VERSION + ", Developed by CMDR Charlotte THOMAS");
+        utils.sendMessage(senderID, "Pong !!, Version v3.0, Developed by CMDR Charlotte THOMAS");
     }
 
     @Override

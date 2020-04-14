@@ -1,6 +1,5 @@
 package fr.charlotte.arsreloaded.verifiers;
 
-import fr.charlotte.arsreloaded.AutomaticReportServer;
 import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 
 import java.sql.SQLException;
@@ -9,12 +8,12 @@ public abstract class Verifier implements IVerifier {
 
     protected final String coID;
     protected final String vesselID;
+    protected DatabaseWrapper wrapper;
 
-    protected DatabaseWrapper databaseWrapper = AutomaticReportServer.getWrapper();
-
-    public Verifier(String vesselID, String coID) {
+    public Verifier(String vesselID, String coID, DatabaseWrapper wrapper) {
         this.coID = coID;
         this.vesselID = vesselID;
+        this.wrapper = wrapper;
     }
 
     protected abstract boolean process();
@@ -23,7 +22,7 @@ public abstract class Verifier implements IVerifier {
     public boolean update() {
 
         try {
-            if (!databaseWrapper.isCo(vesselID, coID)) {
+            if (!wrapper.isCo(vesselID, coID)) {
                 return false;
             }
         } catch (SQLException e) {

@@ -1,11 +1,6 @@
 package fr.charlotte.arsreloaded;
 
 import com.github.messenger4j.Messenger;
-import com.github.messenger4j.exception.MessengerApiException;
-import com.github.messenger4j.exception.MessengerIOException;
-import com.github.messenger4j.send.MessagePayload;
-import com.github.messenger4j.send.MessagingType;
-import com.github.messenger4j.send.message.TextMessage;
 import com.google.gson.Gson;
 import fr.charlotte.arsreloaded.configuration.Config;
 import fr.charlotte.arsreloaded.databases.Database;
@@ -14,14 +9,13 @@ import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
 import fr.charlotte.arsreloaded.plugins.ProcessAllReports;
 import fr.charlotte.arsreloaded.plugins.ReportProcessing;
-import fr.charlotte.arsreloaded.utils.*;
+import fr.charlotte.arsreloaded.utils.MessengerUtils;
+import fr.charlotte.arsreloaded.utils.Users;
 import fr.charlotte.arsreloaded.verifiers.implementations.CommandingOfficerVerifier;
 import fr.charlotte.arsreloaded.verifiers.implementations.VesselNameVerifier;
 import fr.charlotte.arsreloaded.verifiers.implementations.VesselTemplateVerifier;
-import org.apache.commons.lang3.StringUtils;
 import org.pf4j.JarPluginManager;
 import org.pf4j.PluginManager;
-import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.Mailer;
 
 import java.io.File;
@@ -40,43 +34,32 @@ public class AutomaticReportServer {
     private static Messenger messenger = null;
     private static Database userDatabase;
     private static Database arsDatabase;
-    private static DatabaseUserWrapper wrapperD;
     private static DatabaseWrapper wrapper;
 
-    public static HashMap<Integer, Integer> vesselByIdCache = null;
-    public static ArrayList<Vessel> vesselsCache = null;
 
-    public static String ARS_VERSION = "v3.0";
-
-    public static String ADMIN_ID = "";
-    public static String ADMIN_MAIL = "";
+    private static String ADMIN_ID = "";
+    private static String ADMIN_MAIL = "";
     private static String TOKEN = "";
     private static String ACCESS_TOKEN = "";
     private static String SECRET = "";
     private static String ARSMAIL = "";
 
-    public static HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
-    public static HashMap<String, ProcessAllReports> processing = new HashMap<>();
+    private static final HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
+    private static final HashMap<String, ProcessAllReports> processing = new HashMap<>();
     private static TreeMap<String, Integer> trackedReports = new TreeMap<>();
 
-    public static SimpleDateFormat DATE = new SimpleDateFormat("MM/YYYY");
+    public static SimpleDateFormat DATE = new SimpleDateFormat("MM/yyyy");
     public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
-    public static SimpleDateFormat DATE_Y = new SimpleDateFormat("YYYY");
+    public static SimpleDateFormat DATE_Y = new SimpleDateFormat("yyyy");
 
     private static Mailer mailer;
 
 
     private final static Gson GSON = new Gson();
 
-    public static PluginManager plugins;
-
-    public static DatabaseWrapper getWrapper() {
-        return wrapper;
-    }
-
     public static void main(String... args) throws InterruptedException, SQLException {
         loadARS();
-        trackedReports = getWrapper().getTrackedReports();
+        trackedReports = wrapper.getTrackedReports();
     }
 
     private static void loadConfig() {
@@ -99,8 +82,7 @@ public class AutomaticReportServer {
         arsDatabase = config.setupMainDatabase();
         userDatabase = config.setupUserDatabase();
 
-        wrapper = new DatabaseWrapper(arsDatabase);
-        wrapperD = new DatabaseUserWrapper(userDatabase);
+        wrapper = new DatabaseWrapper(arsDatabase, processingHashMap, processing, new MessengerUtils(messenger, mailer, ARSMAIL, ADMIN_MAIL));
         mailer = config.buildMailer();
     }
 
@@ -111,12 +93,12 @@ public class AutomaticReportServer {
         if (!file.exists())
             file.mkdir();
         System.out.println(file.getAbsolutePath());
-        plugins = new JarPluginManager(file.toPath());
+        PluginManager plugins = new JarPluginManager(file.toPath());
         plugins.loadPlugins();
         plugins.startPlugins();
 
         for (ReportProcessing processing : plugins.getExtensions(ReportProcessing.class)) {
-            if (!getWrapper().isCo(processing.getVesselID(), processing.getID()))
+            if (!wrapper.isCo(processing.getVesselID(), processing.getID()))
                 continue;
             if (processingHashMap.containsKey(processing.getVesselID()))
                 continue;
@@ -132,7 +114,7 @@ public class AutomaticReportServer {
 
         try {
             for (ProcessAllReports reports : plugins.getExtensions(ProcessAllReports.class)) {
-                if (!getWrapper().isCo(reports.getVesselID(), reports.getID()))
+                if (!wrapper.isCo(reports.getVesselID(), reports.getID()))
                     continue;
                 if (processing.containsKey(reports.getVesselID()))
                     continue;
@@ -150,6 +132,7 @@ public class AutomaticReportServer {
     private static void loadSpark() throws InterruptedException {
         Thread.sleep(100);
         System.out.println("   ");
+        String ARS_VERSION = "v3.0";
         System.out.println("Welcome in ARS " + ARS_VERSION);
         Locale.setDefault(Locale.FRANCE);
         System.out.println("Start Time : " + new SimpleDateFormat("dd/MM/YYYY hh:mm:ss").format(new Date(System.currentTimeMillis())));
@@ -167,13 +150,13 @@ public class AutomaticReportServer {
     }
 
     private static void loadARS() throws InterruptedException, SQLException {
-        loadConfig();
+
         loadPlugins();
         loadSpark();
+        loadConfig();
+        wrapper.getAllVessels();
 
-        getWrapper().getAllVessels();
-
-        Thread verifier = new Thread(new AutoSender());
+        Thread verifier = new Thread(new AutoSender(wrapper));
         verifier.start();
     }
 
@@ -207,16 +190,16 @@ public class AutomaticReportServer {
     private static void setupMetricsRoutes() {
         get("/vessel_by_regions", (request, response) -> {
             response.type("application/json");
-            if (vesselByIdCache == null)
-                return GSON.toJson(getWrapper().getVesselByRegions());
-            return GSON.toJson(vesselByIdCache);
+            if (wrapper.getVesselByIdCache() == null)
+                return GSON.toJson(wrapper.getVesselByRegions());
+            return GSON.toJson(wrapper.getVesselByIdCache());
         });
 
         get("/allvessels", (request, response) -> {
             response.type("application/json");
-            if (vesselsCache != null)
-                return GSON.toJson(vesselsCache);
-            return GSON.toJson(getWrapper().getAllVessels());
+            if (wrapper.getVesselsCache() != null)
+                return GSON.toJson(wrapper.getVesselsCache());
+            return GSON.toJson(wrapper.getAllVessels());
         });
 
         get("/reports_by_date", (request, response) -> {
@@ -229,14 +212,14 @@ public class AutomaticReportServer {
         post("/register_user", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
-            getWrapper().register(users);
+            wrapper.register(users);
             return "User successfully uploaded";
         });
 
         post("/destroy_user", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
-            return getWrapper().destroyUser(users);
+            return wrapper.destroyUser(users);
         });
     }
 
@@ -248,7 +231,7 @@ public class AutomaticReportServer {
                 return "Error please send params";
             String scc = request.queryParams("scc");
             String token = request.queryParams("token");
-            return getWrapper().verifyToken(scc, token);
+            return wrapper.verifyToken(scc, token);
         });
 
         post("/check_co", (request, response) -> {
@@ -262,14 +245,14 @@ public class AutomaticReportServer {
         post("/synchronize", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
-            return getWrapper().getReport(users);
+            return wrapper.getReport(users);
         });
 
         post("/synchronize_user", (request, response) -> {
             response.type("application/json");
             String json = request.body();
             Users s = GSON.fromJson(json, Users.class);
-            return GSON.toJson(getWrapper().synchronizeUser(s));
+            return GSON.toJson(wrapper.synchronizeUser(s));
         });
     }
 
@@ -277,7 +260,7 @@ public class AutomaticReportServer {
         post("/submit", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
-            return getWrapper().saveReport(users);
+            return wrapper.saveReport(users);
         });
         post("/update_template", (request, response) -> {
             String json = request.body();
@@ -290,7 +273,7 @@ public class AutomaticReportServer {
         post("/switch_vessel", (request, response) -> {
             String json = request.body();
             Users users = GSON.fromJson(json, Users.class);
-            return getWrapper().switchVessel(users, users.getVesselID());
+            return wrapper.switchVessel(users, users.getVesselID());
         });
 
         post("/update_name", (request, response) -> {
@@ -310,12 +293,8 @@ public class AutomaticReportServer {
         setupSubmitRoutes();
         setupUpdateRoute();
 
-        get("/send", (request, response) -> getWrapper().sendReports());
+        get("/send", (request, response) -> wrapper.sendReports());
         get("/hello", (request, response) -> "Hello World");
-    }
-
-    public static void sendCompletedMail(String subject, String message, String recipientName, String recipientAdress) {
-        mailer.sendMail(EmailBuilder.startingBlank().from("ARS Mail Sender", ARSMAIL).to(recipientName, recipientAdress).withSubject(subject).withPlainText(message).buildEmail());
     }
 
 
@@ -326,15 +305,16 @@ public class AutomaticReportServer {
      * @param recipientID Messenger ID of the sender of the command
      */
     private static void parseCommand(String text, String recipientID) {
-        if (!text.startsWith("!")) {
-            sendHelp(recipientID);
+        MessengerUtils utils = new MessengerUtils(messenger, mailer, ARSMAIL, ADMIN_MAIL);
+        if (!text.startsWith("&")) {
+            utils.sendHelp(recipientID);
             return;
         }
         String[] rawCommand = text.substring(1).split(" ");
         String command = rawCommand[0];
         String[] args = Arrays.copyOfRange(rawCommand, 1, rawCommand.length);
         if (!Command.commands.containsKey(command) && !Command.alias.containsKey(command)) {
-            sendHelp(recipientID);
+            utils.sendHelp(recipientID);
             return;
         }
         Command c;
@@ -342,74 +322,7 @@ public class AutomaticReportServer {
             c = Command.commands.get(command);
         else
             c = Command.alias.get(command);
-        c.onCommand(recipientID, text, args);
+        c.execute(recipientID, text, args, wrapper, utils, new DatabaseUserWrapper(userDatabase), ADMIN_ID);
     }
 
-    /**
-     * Method to send the help ( all commands and their usage ) to a user.
-     *
-     * @param recipientID ID of the recipient.
-     */
-    public static void sendHelp(String recipientID) {
-        ArrayList<String> message = new ArrayList<>();
-
-        if (Command.commands.isEmpty()) {
-            sendMessage(recipientID, "No commands are registred, please contact the administrator for any further help.");
-            return;
-        } else {
-            message.add("■ Help for Commands, all commands start with '!' character");
-            message.add("■ [] => required argument\n" +
-                    "■ {} => optional argument");
-            message.add("");
-            for (Command c : Command.commands.values()) {
-                if (!c.isHidden()) {
-                    message.add("● !" + c.getName() + c.args() + " ⇒ " + c.usage());
-                }
-            }
-        }
-        sendMultiMessage(recipientID, "ARS Help", message);
-    }
-
-    /**
-     * Method to send a messenger message to a person
-     *
-     * @param recipientID ID of the recipient of the message
-     * @param message     The message
-     */
-    public static void sendMessage(String recipientID, String message) {
-        MessagePayload payload = MessagePayload.create(recipientID, MessagingType.RESPONSE, TextMessage.create(message));
-        try {
-            messenger.send(payload);
-        } catch (MessengerApiException | MessengerIOException e) {
-            System.out.println("An error occured with message " + message + " with rid " + recipientID + "\n" + e.getMessage());
-        }
-    }
-
-    /**
-     * Method to send an organized message in multi line
-     *
-     * @param recipientID ID of the recipient of the message
-     * @param header      Header in the upper and lower bars
-     * @param messages    The message
-     */
-    public static void sendMultiMessage(String recipientID, String header, List<String> messages) {
-        ArrayList<String> finalM = new ArrayList<>();
-        finalM.add(String.format("-------------------------------- %s --------------------------------", header));
-        finalM.addAll(messages);
-        finalM.add(String.format("-------------------------------- %s --------------------------------", header));
-        String message = StringUtils.join(finalM, "\n");
-        sendMessage(recipientID, message);
-    }
-
-    public static Database getUserDatabase() {
-        return userDatabase;
-    }
-
-    public static Database getArsDatabase() {
-        return arsDatabase;
-    }
-
-    public static DatabaseUserWrapper getWrapperD() {
-        return wrapperD;
-    }
 }

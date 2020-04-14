@@ -1,12 +1,12 @@
 package fr.charlotte.arsreloaded.commands;
 
+import fr.charlotte.arsreloaded.databases.DatabaseUserWrapper;
+import fr.charlotte.arsreloaded.databases.DatabaseWrapper;
 import fr.charlotte.arsreloaded.plugins.Command;
+import fr.charlotte.arsreloaded.utils.MessengerUtils;
 import org.pf4j.Extension;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import static fr.charlotte.arsreloaded.AutomaticReportServer.sendMultiMessage;
 
 @Extension
 public class AboutCommand extends Command {
@@ -16,9 +16,8 @@ public class AboutCommand extends Command {
     }
 
 
-
     @Override
-    public void onCommand(String senderID, String text, String[] args) {
+    public void onCommand(String senderID, String text, String[] args, DatabaseWrapper wrapper, MessengerUtils utils, DatabaseUserWrapper userWrapper) {
         ArrayList<String> message = new ArrayList<>();
         message.add(" ");
         message.add("Automatize all your report in your chapter !");
@@ -26,7 +25,7 @@ public class AboutCommand extends Command {
         message.add("Developed with ❤️ by Charlotte THOMAS");
         message.add("Maintained and Hosted by USS Versailles, R9");
         message.add(" ");
-        sendMultiMessage(senderID, "Automatic Report Server", message);
+        utils.sendMultiMessage(senderID, "Automatic Report Server", message);
     }
 
     @Override
