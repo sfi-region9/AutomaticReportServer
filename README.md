@@ -35,7 +35,12 @@
       "dbName":"name",
       "dbUser":"user",
       "dbPassword":"password",
-      "dbUserName":"userDatabase"
+      "dbUserName":"userDatabase",
+      "adminMail":"adminEmail",
+      "smtpHost":"smtpServerHost",
+      "mailUser": "mailUsername",
+      "mailPassword": "mailPassword",
+      "mailPort": 587
     }
 ```
 * Build the server with `$ mvn clean install`
