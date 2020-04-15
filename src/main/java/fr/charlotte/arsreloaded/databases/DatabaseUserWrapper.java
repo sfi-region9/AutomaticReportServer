@@ -19,6 +19,7 @@ public class DatabaseUserWrapper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        arsUserDatabase.closeConnection();
         return false;
     }
 
@@ -31,6 +32,7 @@ public class DatabaseUserWrapper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        arsUserDatabase.closeConnection();
         return false;
     }
 
@@ -38,6 +40,7 @@ public class DatabaseUserWrapper {
         if (!match(username, uuid))
             return false;
         arsUserDatabase.update("UPDATE users SET messengerid ='" + id + "' WHERE username='" + username + "'");
+        arsUserDatabase.closeConnection();
         return true;
     }
 

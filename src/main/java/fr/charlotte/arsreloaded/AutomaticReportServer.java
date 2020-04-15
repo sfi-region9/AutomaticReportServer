@@ -22,6 +22,8 @@ import java.io.File;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static spark.Spark.*;
 
@@ -33,29 +35,34 @@ public class AutomaticReportServer {
 
     private static Messenger messenger = null;
     private static Database userDatabase;
-    private static Database arsDatabase;
     private static DatabaseWrapper wrapper;
 
 
-    private static String ADMIN_ID = "";
-    private static String ADMIN_MAIL = "";
-    private static String TOKEN = "";
-    private static String ACCESS_TOKEN = "";
-    private static String SECRET = "";
-    private static String ARSMAIL = "";
+    private static String adminID = "";
+    private static String adminMail = "";
+    private static String token = "";
+    private static String accessToken = "";
+    private static String secret = "";
+    private static String arsMail = "";
 
     private static final HashMap<String, ReportProcessing> processingHashMap = new HashMap<>();
     private static final HashMap<String, ProcessAllReports> processing = new HashMap<>();
     private static TreeMap<String, Integer> trackedReports = new TreeMap<>();
 
-    public static SimpleDateFormat DATE = new SimpleDateFormat("MM/yyyy");
-    public static SimpleDateFormat DATE_M = new SimpleDateFormat("MM");
-    public static SimpleDateFormat DATE_Y = new SimpleDateFormat("yyyy");
+    public static final SimpleDateFormat date = new SimpleDateFormat("MM/yyyy");
+    public static final SimpleDateFormat dateMonth = new SimpleDateFormat("MM");
+    public static final SimpleDateFormat dateYear = new SimpleDateFormat("yyyy");
 
+    private static final String JSON = "application/json";
     private static Mailer mailer;
 
+    private static final Logger logger = Logger.getLogger("Automatic Report Server");
 
-    private final static Gson GSON = new Gson();
+    public static Logger getLogger() {
+        return logger;
+    }
+
+    private static final Gson GSON = new Gson();
 
     public static void main(String... args) throws InterruptedException, SQLException {
         loadARS();
@@ -72,17 +79,17 @@ public class AutomaticReportServer {
         if (config == null)
             System.exit(0);
 
-        ACCESS_TOKEN = config.getAccessToken();
-        SECRET = config.getSecretKey();
-        ADMIN_ID = config.getAdminID();
-        TOKEN = config.getVerifyToken();
-        ARSMAIL = config.getMailUser();
-        ADMIN_MAIL = config.getAdminMail();
+        accessToken = config.getAccessToken();
+        secret = config.getSecretKey();
+        adminID = config.getAdminID();
+        token = config.getVerifyToken();
+        arsMail = config.getMailUser();
+        adminMail = config.getAdminMail();
 
-        arsDatabase = config.setupMainDatabase();
+        Database arsDatabase = config.setupMainDatabase();
         userDatabase = config.setupUserDatabase();
 
-        wrapper = new DatabaseWrapper(arsDatabase, processingHashMap, processing, new MessengerUtils(messenger, mailer, ARSMAIL, ADMIN_MAIL));
+        wrapper = new DatabaseWrapper(arsDatabase, processingHashMap, processing, new MessengerUtils(messenger, mailer, arsMail, adminMail));
         mailer = config.buildMailer();
     }
 
@@ -92,38 +99,34 @@ public class AutomaticReportServer {
         File file = new File("plugins/");
         if (!file.exists())
             file.mkdir();
-        System.out.println(file.getAbsolutePath());
+        logger.log(Level.INFO, file.getAbsolutePath());
         PluginManager plugins = new JarPluginManager(file.toPath());
         plugins.loadPlugins();
         plugins.startPlugins();
 
         for (ReportProcessing processing : plugins.getExtensions(ReportProcessing.class)) {
-            if (!wrapper.isCo(processing.getVesselID(), processing.getID()))
-                continue;
-            if (processingHashMap.containsKey(processing.getVesselID()))
+            if (!wrapper.isCo(processing.getVesselID(), processing.getID()) || processingHashMap.containsKey(processing.getVesselID()))
                 continue;
             processingHashMap.put(processing.getVesselID(), processing);
-            System.out.println(processing.getVesselID() + " User report plugin was added to the server");
+            logger.log(Level.INFO, processing.getVesselID() + " User report plugin was added to the server");
         }
 
         plugins.getExtensions(Command.class).forEach(command -> {
             command.register();
-            System.out.println("Register command : " + command.getName() + " from " + command.getClass().getName());
+            logger.log(Level.INFO, "Register command : " + command.getName() + " from " + command.getClass().getName());
         });
 
 
         try {
             for (ProcessAllReports reports : plugins.getExtensions(ProcessAllReports.class)) {
-                if (!wrapper.isCo(reports.getVesselID(), reports.getID()))
-                    continue;
-                if (processing.containsKey(reports.getVesselID()))
+                if (!wrapper.isCo(reports.getVesselID(), reports.getID()) || processing.containsKey(reports.getVesselID()))
                     continue;
                 processing.put(reports.getVesselID(), reports);
-                System.out.println(reports.getVesselID() + " Post user report processing plugin was added");
+                logger.log(Level.INFO, reports.getVesselID() + " Post user report processing plugin was added");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage());
         }
 
 
@@ -131,18 +134,17 @@ public class AutomaticReportServer {
 
     private static void loadSpark() throws InterruptedException {
         Thread.sleep(100);
-        System.out.println("   ");
-        String ARS_VERSION = "v3.0";
-        System.out.println("Welcome in ARS " + ARS_VERSION);
+        logger.log(Level.INFO, "   ");
+        logger.log(Level.INFO, "Welcome in ARS v3.0");
         Locale.setDefault(Locale.FRANCE);
-        System.out.println("Start Time : " + new SimpleDateFormat("dd/MM/YYYY hh:mm:ss").format(new Date(System.currentTimeMillis())));
-        System.out.println("   ");
+        logger.log(Level.INFO, "Start Time : {0}", new SimpleDateFormat("dd/MM/yyyy hh:mm:ss").format(new Date(System.currentTimeMillis())));
+        logger.log(Level.INFO, "   ");
         Thread.sleep(100);
         //Build messenger
         try {
-            messenger = Messenger.create(ACCESS_TOKEN, SECRET, TOKEN);
+            messenger = Messenger.create(accessToken, secret, token);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage());
         }
         ipAddress("127.0.0.1");
         port(5555);
@@ -165,15 +167,16 @@ public class AutomaticReportServer {
      */
 
     private static void setupRootRoute() {
+        String invalid = "Invalid";
         get("/", (request, response) -> {
             if (request.queryParams().isEmpty())
-                return "Invalid";
+                return invalid;
             String sentToken = request.queryParams("hub.verify_token");
             if (sentToken == null)
-                return "Invalid";
-            if (sentToken.equalsIgnoreCase(TOKEN))
+                return invalid;
+            if (sentToken.equalsIgnoreCase(token))
                 return request.queryParams("hub.challenge");
-            return "Invalid";
+            return invalid;
         });
         post("/", (request, response) -> {
             String payload = request.body();
@@ -189,21 +192,21 @@ public class AutomaticReportServer {
 
     private static void setupMetricsRoutes() {
         get("/vessel_by_regions", (request, response) -> {
-            response.type("application/json");
+            response.type(JSON);
             if (wrapper.getVesselByIdCache() == null)
                 return GSON.toJson(wrapper.getVesselByRegions());
             return GSON.toJson(wrapper.getVesselByIdCache());
         });
 
         get("/allvessels", (request, response) -> {
-            response.type("application/json");
+            response.type(JSON);
             if (wrapper.getVesselsCache() != null)
                 return GSON.toJson(wrapper.getVesselsCache());
             return GSON.toJson(wrapper.getAllVessels());
         });
 
         get("/reports_by_date", (request, response) -> {
-            response.type("application/json");
+            response.type(JSON);
             return GSON.toJson(trackedReports);
         });
     }
@@ -249,7 +252,7 @@ public class AutomaticReportServer {
         });
 
         post("/synchronize_user", (request, response) -> {
-            response.type("application/json");
+            response.type(JSON);
             String json = request.body();
             Users s = GSON.fromJson(json, Users.class);
             return GSON.toJson(wrapper.synchronizeUser(s));
@@ -279,7 +282,7 @@ public class AutomaticReportServer {
         post("/update_name", (request, response) -> {
             String json = request.body();
             VesselNameVerifier ns = GSON.fromJson(json, VesselNameVerifier.class);
-            System.out.println(ns.update());
+            logger.log(Level.INFO, "{0}", ns.update());
             return ns.update();
         });
     }
@@ -305,7 +308,7 @@ public class AutomaticReportServer {
      * @param recipientID Messenger ID of the sender of the command
      */
     private static void parseCommand(String text, String recipientID) {
-        MessengerUtils utils = new MessengerUtils(messenger, mailer, ARSMAIL, ADMIN_MAIL);
+        MessengerUtils utils = new MessengerUtils(messenger, mailer, arsMail, adminMail);
         if (!text.startsWith("&")) {
             utils.sendHelp(recipientID);
             return;
@@ -322,7 +325,7 @@ public class AutomaticReportServer {
             c = Command.commands.get(command);
         else
             c = Command.alias.get(command);
-        c.execute(recipientID, text, args, wrapper, utils, new DatabaseUserWrapper(userDatabase), ADMIN_ID);
+        c.execute(recipientID, text, args, wrapper, utils, new DatabaseUserWrapper(userDatabase), adminID);
     }
 
 }

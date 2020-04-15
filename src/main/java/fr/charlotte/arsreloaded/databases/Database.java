@@ -1,6 +1,8 @@
 package fr.charlotte.arsreloaded.databases;
 
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
 /**
  * @author Hugo
  */
-public class Database {
+public class Database implements Closeable {
 
     private Connection connection;
 
@@ -142,4 +144,8 @@ public class Database {
         return (ResultSet) request;
     }
 
+    @Override
+    public void close() {
+        closeConnection();
+    }
 }

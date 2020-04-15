@@ -558,7 +558,7 @@ public class DatabaseWrapper {
         ArrayList<String> message = new ArrayList<>();
         int reports = 0;
 
-        message.add("Starting " + AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
+        message.add("Starting " + AutomaticReportServer.date.format(new Date(System.currentTimeMillis())) + " Reports");
         message.add("--------------------------------------------------------------------");
         message.add(" ");
         Users[] userList = new Users[usersList.size()];
@@ -576,8 +576,8 @@ public class DatabaseWrapper {
             par.process(userList, vessel);
 
         message.add(" ");
-        message.add("End of " + AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis())) + " Reports");
-        messengerUtils.sendCompletedMail(vessel.getName().replace("_", " ") + "'s Reports " + AutomaticReportServer.DATE.format(new Date(System.currentTimeMillis())), StringUtils.join(message, "\n"), vessel.getName().replace("_", " "), vessel.getReportOfficerMail());
+        message.add("End of " + AutomaticReportServer.date.format(new Date(System.currentTimeMillis())) + " Reports");
+        messengerUtils.sendCompletedMail(vessel.getName().replace("_", " ") + "'s Reports " + AutomaticReportServer.date.format(new Date(System.currentTimeMillis())), StringUtils.join(message, "\n"), vessel.getName().replace("_", " "), vessel.getReportOfficerMail());
         return reports;
     }
 
