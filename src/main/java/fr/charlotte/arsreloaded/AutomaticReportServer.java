@@ -152,8 +152,9 @@ public class AutomaticReportServer {
     private static void loadARS() throws InterruptedException, SQLException {
 
         loadPlugins();
-        loadSpark();
         loadConfig();
+        loadSpark();
+
         wrapper.getAllVessels();
 
         Thread verifier = new Thread(new AutoSender(wrapper));
@@ -177,12 +178,17 @@ public class AutomaticReportServer {
         });
         post("/", (request, response) -> {
             String payload = request.body();
-            messenger.onReceiveEvents(payload, java.util.Optional.ofNullable(request.headers(Messenger.SIGNATURE_HEADER_NAME)), event -> {
-                if (event.isTextMessageEvent()) {
-                    String text = event.asTextMessageEvent().text();
-                    parseCommand(text, event.senderId());
-                }
-            });
+            Optional<String> s = Optional.of(request.headers(Messenger.SIGNATURE_HEADER_NAME));
+            try {
+                messenger.onReceiveEvents(payload, s, event -> {
+                    if (event.isTextMessageEvent()) {
+                        String text = event.asTextMessageEvent().text();
+                        parseCommand(text, event.senderId());
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return "H";
         });
     }
