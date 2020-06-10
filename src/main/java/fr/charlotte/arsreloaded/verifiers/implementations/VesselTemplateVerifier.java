@@ -7,13 +7,13 @@ public class VesselTemplateVerifier extends Verifier {
 
     private String template;
 
-    public VesselTemplateVerifier(String vesselID, String coID, String template, DatabaseWrapper wrapper) {
-        super(vesselID, coID, wrapper);
+    public VesselTemplateVerifier(String vesselID, String coID, String template) {
+        super(vesselID, coID);
         this.template = template;
     }
 
     @Override
-    protected boolean process() {
+    protected boolean process(DatabaseWrapper wrapper) {
         template = template.replace("\n", "\\n");
         wrapper.changeVesselTemplate(vesselID, template);
         return true;

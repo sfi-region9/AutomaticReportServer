@@ -7,13 +7,13 @@ public class VesselNameVerifier extends Verifier {
 
     private String text;
 
-    public VesselNameVerifier(String vesselID, String coID, String text, DatabaseWrapper wrapper) {
-        super(vesselID, coID, wrapper);
+    public VesselNameVerifier(String vesselID, String coID, String text) {
+        super(vesselID, coID);
         this.text = text;
     }
 
     @Override
-    protected boolean process() {
+    protected boolean process(DatabaseWrapper wrapper) {
         text = text.replace("\n", "\\n");
         wrapper.changeVesselDefaultReport(vesselID, text);
         return true;

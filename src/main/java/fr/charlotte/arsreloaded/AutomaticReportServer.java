@@ -243,7 +243,7 @@ public class AutomaticReportServer {
         post("/check_co", (request, response) -> {
             String json = request.body();
             CommandingOfficerVerifier co = GSON.fromJson(json, CommandingOfficerVerifier.class);
-            return co.update();
+            return co.update(wrapper);
         });
     }
 
@@ -271,7 +271,7 @@ public class AutomaticReportServer {
         post("/update_template", (request, response) -> {
             String json = request.body();
             VesselTemplateVerifier v = GSON.fromJson(json, VesselTemplateVerifier.class);
-            return v.update();
+            return v.update(wrapper);
         });
     }
 
@@ -285,8 +285,7 @@ public class AutomaticReportServer {
         post("/update_name", (request, response) -> {
             String json = request.body();
             VesselNameVerifier ns = GSON.fromJson(json, VesselNameVerifier.class);
-            System.out.println(ns.update());
-            return ns.update();
+            return ns.update(wrapper);
         });
     }
 

@@ -8,19 +8,17 @@ public abstract class Verifier implements IVerifier {
 
     protected final String coID;
     protected final String vesselID;
-    protected DatabaseWrapper wrapper;
 
-    public Verifier(String vesselID, String coID, DatabaseWrapper wrapper) {
+    public Verifier(String vesselID, String coID) {
         this.coID = coID;
         this.vesselID = vesselID;
-        this.wrapper = wrapper;
     }
 
-    protected abstract boolean process();
+    protected abstract boolean process(DatabaseWrapper wrapper);
+
 
     @Override
-    public boolean update() {
-
+    public boolean update(DatabaseWrapper wrapper) {
         try {
             if (!wrapper.isCo(vesselID, coID)) {
                 return false;
@@ -29,6 +27,6 @@ public abstract class Verifier implements IVerifier {
             e.printStackTrace();
             return false;
         }
-        return process();
+        return process(wrapper);
     }
 }

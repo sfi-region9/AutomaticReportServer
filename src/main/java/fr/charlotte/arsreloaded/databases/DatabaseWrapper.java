@@ -230,6 +230,7 @@ public class DatabaseWrapper {
     public boolean isCo(String vesselid, String coid) throws SQLException {
         boolean b = arsDatabase.getResult("SELECT * FROM vessels WHERE coid='" + coid + "' AND vesselid='" + vesselid + "'").next();
         arsDatabase.closeConnection();
+        System.out.println(b);
         return b;
     }
 
